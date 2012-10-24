@@ -1,0 +1,33 @@
+#
+# Filename : trans003.dat
+# Date of creation : Mon 26/5/97
+# Created using : by hand (Foo Hee Meng)
+# Parameters : NIL
+# Input File : NIL
+#
+
+_NUM_VES
+16
+
+_TRANS_MAT
+0 3 100
+0 5 80
+0 7 30
+0 8 70
+0 11 200
+2 6 40
+2 13 80
+3 0 200
+3 1 40
+3 14 20
+4 8 10
+4 15 20
+8 4 20
+9 0 50
+10 0 70
+10 7 100
+11 0 200
+11 12 70
+12 11 80
+13 2 30
+15 9 40

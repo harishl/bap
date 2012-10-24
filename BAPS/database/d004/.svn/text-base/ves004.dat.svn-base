@@ -1,0 +1,82 @@
+#
+# Filename : /home/proj/rp6488/BAP//expt/data/ves005.dat
+# Date of creation : Mon Jul 28 04:10:28 1997
+# Created using : /home/proj/rp6488/BAP//bin/GenVes
+# Parameters : NIL
+# Input File : /home/proj/rp6488/BAP//expt/temp/traf.temp
+#
+
+_NUM_VES 
+25
+
+_WINDOW
+24
+
+_TOT_LEN
+1200
+
+_TRGT_ABD 
+0.5
+
+_REAL_ABD
+0.497257
+
+# Vessel Data 
+# <vessel id> <class> <name> <voyage> <length> <width> <draft> 
+
+_VESSEL
+0  5 Port  Null  0 0 0
+1  1 ves2  voy2  174 0 0
+2  1 ves3  voy3  168 0 0
+3  0 ves4  voy4  117 0 0
+4  0 ves5  voy5  124 0 0
+5  0 ves6  voy6  117 0 0
+6  0 ves7  voy7  124 0 0
+7  0 ves8  voy8  119 0 0
+8  0 ves9  voy9  119 0 0
+9  0 ves10 voy10 114 0 0
+10 0 ves11 voy11 119 0 0
+11 0 ves12 voy12 132 0 0
+12 0 ves13 voy13 115 0 0
+13 1 ves14 voy14 182 0 0
+14 0 ves15 voy15 126 0 0
+15 0 ves16 voy16 121 0 0
+16 1 ves17 voy17 168 0 0
+17 0 ves18 voy18 123 0 0
+18 0 ves19 voy19 129 0 0
+19 1 ves20 voy20 185 0 0
+20 0 ves21 voy21 129 0 0
+21 1 ves22 voy22 175 0 0
+22 0 ves23 voy23 113 0 0
+23 0 ves24 voy24 129 0 0
+24 1 ves25 voy25 182 0 0
+
+# Vessel Schedule
+# <vessel id> <arrival> <departure> <duration> <delay>
+
+_VES_SCHEDULE
+0 1 25 24 0
+1 5 10 5 0
+2 1 8 7 0
+3 15 18 3 0
+4 16 19 3 0
+5 1 4 3 0
+6 13 16 3 0
+7 13 16 3 0
+8 11 14 3 0
+9 10 13 3 0
+10 2 6 4 0
+11 7 10 3 0
+12 19 23 4 0
+13 12 18 6 0
+14 16 19 3 0
+15 18 21 3 0
+16 11 18 7 0
+17 7 10 3 0
+18 5 8 3 0
+19 1 7 6 0
+20 1 5 4 0
+21 2 8 6 0
+22 7 10 3 0
+23 12 15 3 0
+24 16 23 7 0

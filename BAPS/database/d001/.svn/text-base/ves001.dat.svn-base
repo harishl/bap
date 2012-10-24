@@ -1,0 +1,48 @@
+#
+# Filename : ves000.dat
+# Date of creation : Mon 3/10/97
+# Created using : Handcrafted (DOTW)
+# Parameters : NIL
+# Input File : NIL
+#
+# Comments:  Example for BAP v1.0 Documentation
+#
+
+_NUM_VES 
+7
+
+_WINDOW
+10
+
+_TOT_LEN
+800
+
+_TRGT_ABD 
+0.75
+
+_REAL_ABD
+0.767477
+
+# Vessel Data 
+# <vessel id> <class> <name> <voyage> <length> <width> <draft> 
+
+_VESSEL
+0 5 SinPort    Null   0 0 0 
+1 1 Atlantica  voy1 100 0 0 
+2 2 BrightSun  voy2 250 0 0
+3 1 Christina  voy3 100 0 0
+4 1 Diana      voy4 100 0 0
+5 2 Elizabeth  voy5 250 0 0
+6 1 Futura     voy6 100 0 0
+
+# Vessel Schedule
+# <vessel id> <arrival> <departure> <duration> <delay>
+
+_VES_SCHEDULE
+0 1 10 9 0
+1 1 3 2 0
+2 4 8 4 0
+3 8 10 2 0
+4 2 4 2 0
+5 3 8 5 0
+6 7 9 2 0

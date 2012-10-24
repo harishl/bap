@@ -1,0 +1,63 @@
+#
+# Filename : tv.par
+# Date of creation : Mon 9 Sep 2002
+# Created using : by hand (LSC)
+# Parameters : NIL
+# Input File : NIL
+# Comments : BAPS Parameter File
+#            Obtained by combining tract BAP-GP (David)
+#            parameter files
+#
+
+
+######################################
+# Partitioning Parameters
+######################################
+
+_PARTITIONING_ALGO
+TV
+
+_RANDOM_SEED
+12345
+
+# Debugging parameters:
+#  0 = no printout
+#  1 = concise printout
+#  2 = verbose printout
+
+_OUTPUT
+1
+
+_PRINT_BUCKET
+0
+
+_PRINT_SECTIONS
+0
+
+_PRINT_VESSELS
+0
+
+_SUMMARY
+0
+
+######################################
+# Packing Parameters
+######################################
+
+_COMPUTE_PACKING_WIDTH
+NO
+
+_CONSIDER_TRANS
+NO
+
+_PROBLEM_MODEL
+SS
+
+_ALGO_VERSION
+OF
+
+_PACK_ALGO
+FF
+
+_SORT_RULES
+DRA

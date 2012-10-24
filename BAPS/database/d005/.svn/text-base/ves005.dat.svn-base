@@ -1,0 +1,151 @@
+#
+# Filename : /home/proj/rp6488/t/TRY/temp_ves.tmp
+# Date of creation : Mon May 25 09:02:24 1998
+# Created using : BAP System Version 1.0
+# Parameters : NIL
+# Input File : ves-new.dat
+#
+
+_NUM_VES 
+61
+
+_WINDOW
+84
+
+_TRGT_ABD 
+0
+
+_REAL_ABD
+0.255804
+
+# Vessel Data 
+# <vessel id> <class> <length> <width> <draft> 
+
+_VESSEL
+0 5 Port Null 0 0 0
+1 1 ves2 voy2 156 0 0
+2 1 ves3 voy3 148 0 0
+3 0 ves4 voy4 65 0 0
+4 0 ves5 voy5 71 0 0
+5 0 ves6 voy6 64 0 0
+6 0 ves7 voy7 76 0 0
+7 0 ves8 voy8 68 0 0
+8 0 ves9 voy9 69 0 0
+9 0 ves10 voy10 75 0 0
+10 0 ves11 voy11 71 0 0
+11 0 ves12 voy12 64 0 0
+12 0 ves13 voy13 71 0 0
+13 0 ves14 voy14 76 0 0
+14 0 ves15 voy15 76 0 0
+15 0 ves16 voy16 63 0 0
+16 1 ves17 voy17 146 0 0
+17 0 ves18 voy18 76 0 0
+18 0 ves19 voy19 69 0 0
+19 1 ves20 voy20 147 0 0
+20 1 ves21 voy21 161 0 0
+21 1 ves22 voy22 156 0 0
+22 0 ves23 voy23 64 0 0
+23 0 ves24 voy24 64 0 0
+24 0 ves25 voy25 66 0 0
+25 1 ves26 voy26 149 0 0
+26 0 ves27 voy27 64 0 0
+27 0 ves28 voy28 66 0 0
+28 0 ves29 voy29 69 0 0
+29 1 ves30 voy30 162 0 0
+30 1 ves31 voy31 143 0 0
+31 1 ves2 voy2 158 0 0
+32 1 ves3 voy3 163 0 0
+33 0 ves4 voy4 73 0 0
+34 0 ves5 voy5 74 0 0
+35 0 ves6 voy6 72 0 0
+36 0 ves7 voy7 74 0 0
+37 0 ves8 voy8 65 0 0
+38 0 ves9 voy9 68 0 0
+39 0 ves10 voy10 63 0 0
+40 0 ves11 voy11 72 0 0
+41 0 ves12 voy12 70 0 0
+42 0 ves13 voy13 72 0 0
+43 0 ves14 voy14 70 0 0
+44 0 ves15 voy15 73 0 0
+45 0 ves16 voy16 76 0 0
+46 1 ves17 voy17 156 0 0
+47 0 ves18 voy18 69 0 0
+48 0 ves19 voy19 64 0 0
+49 1 ves20 voy20 163 0 0
+50 1 ves21 voy21 152 0 0
+51 1 ves22 voy22 154 0 0
+52 0 ves23 voy23 69 0 0
+53 0 ves24 voy24 74 0 0
+54 0 ves25 voy25 73 0 0
+55 1 ves26 voy26 157 0 0
+56 0 ves27 voy27 67 0 0
+57 0 ves28 voy28 63 0 0
+58 0 ves29 voy29 70 0 0
+59 1 ves30 voy30 142 0 0
+60 1 ves31 voy31 143 0 0
+
+# Vessel Schedule
+# <vessel id> <arrival> <departure> <duration> <delay>
+
+_VES_SCHEDULE
+0 1 85 84 0
+1 46 52 6 0
+2 77 82 5 0
+3 78 81 3 0
+4 42 46 4 0
+5 69 72 3 0
+6 18 21 3 0
+7 70 73 3 0
+8 49 53 4 0
+9 47 51 4 0
+10 64 67 3 0
+11 9 12 3 0
+12 42 44 2 0
+13 1 4 3 0
+14 10 14 4 0
+15 56 58 2 0
+16 34 40 6 0
+17 24 27 3 0
+18 35 38 3 0
+19 27 34 7 0
+20 63 69 6 0
+21 62 67 5 0
+22 27 30 3 0
+23 81 84 3 0
+24 53 56 3 0
+25 32 38 6 0
+26 6 9 3 0
+27 26 29 3 0
+28 51 54 3 0
+29 38 43 5 0
+30 20 27 7 0
+31 43 48 5 0
+32 64 70 6 0
+33 14 17 3 0
+34 52 55 3 0
+35 59 62 3 0
+36 51 55 4 0
+37 63 66 3 0
+38 59 62 3 0
+39 74 77 3 0
+40 18 21 3 0
+41 11 15 4 0
+42 50 52 2 0
+43 33 36 3 0
+44 45 48 3 0
+45 15 18 3 0
+46 59 64 5 0
+47 27 31 4 0
+48 23 26 3 0
+49 46 53 7 0
+50 5 12 7 0
+51 61 67 6 0
+52 2 4 2 0
+53 13 17 4 0
+54 27 30 3 0
+55 66 73 7 0
+56 41 45 4 0
+57 60 63 3 0
+58 7 10 3 0
+59 33 39 6 0
+60 65 72 7 0

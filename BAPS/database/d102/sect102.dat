@@ -1,0 +1,35 @@
+#
+# Filename : sect001.dat
+# Date of creation : Tue 15/7/97
+# Created using : by hand (Foo Hee Meng)
+# Parameters : Nil
+# Input File : Nil
+#
+# This section data file depicts a port scenario of the following
+# characteristics:
+# 
+#    Scenario Name         : Small Port
+#    Number of Sections    : 2
+#    Layout                : Straight line, symmetric distances between
+#                            sections, equal section lengths
+#    Section Lengths       : 600m
+#    Gate Position         : Equidistant from all sections (300m)
+
+_NUM_SECT
+3
+
+_SECTION
+0 Gate 0
+1 sect_1 600
+2 sect_2 600
+
+_INTERSECT_DIST
+0 0 0
+0 1 300
+0 2 300
+1 0 300
+1 1 0
+1 2 600
+2 0 300
+2 1 600
+2 2 0

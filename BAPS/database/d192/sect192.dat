@@ -1,0 +1,54 @@
+#
+# Filename : sect002.dat
+# Date of creation : Tue 15/7/97
+# Created using : by hand (Foo Hee Meng)
+# Parameters : Nil
+# Input File : Nil
+#
+# This section data file depicts a port scenario of the following
+# characteristics:
+# 
+#    Scenario Name         : Brani Terminal
+#    Number of Sections    : 4
+#    Layout                : Straight line, symmetric distances between
+#                            sections, non-equal sized sections 
+#    Section Lengths       : 600m, 480m, 800m, 200m
+#    Gate Position         : increasing distances 
+
+
+_NUM_SECT
+5
+
+_SECTION
+0 Gate 0
+1 BT-S1 600
+2 BT-S2 480
+3 BT-S3 800
+4 BT-S4 200
+
+_INTERSECT_DIST
+0 1 1800
+0 2 2400
+0 3 2850
+0 4 2850
+1 0 1800
+2 0 2400
+3 0 2850
+4 0 2850
+0 0 0
+1 1 0
+2 2 0
+3 3 0
+4 4 0
+1 2 540
+1 3 1180
+1 4 1680
+2 1 540
+2 3 640
+2 4 1140
+3 1 1180
+3 2 640
+3 4 500
+4 1 1680
+4 2 1140
+4 3 500

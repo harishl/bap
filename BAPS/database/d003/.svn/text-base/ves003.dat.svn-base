@@ -1,0 +1,64 @@
+#
+# Filename : ves003.dat
+# Date of creation : Mon 26/5/97
+# Created using : by hand (Foo Hee Meng)
+# Parameters : NIL
+# Input File : NIL
+#
+
+_NUM_VES 
+16
+
+_WINDOW
+10
+
+_TOT_LEN
+700
+
+_TRGT_ABD 
+0.75
+
+_REAL_ABD
+0.767477
+
+# Vessel Data 
+# <vessel id> <name> <voyage> <class> <length> <width> <draft> 
+
+_VESSEL
+0 Port Null 5 0 0 0 
+1 ves1 voy1 0 83 0 0 
+2 ves2 voy2 0 95 0 0
+3 ves3 voy3 2 234 0 0
+4 ves4 voy4 1 140 0 0
+5 ves5 voy5 1 162 0 0
+6 ves6 voy6 0 90 0 0
+7 ves7 voy7 0 82 0 0
+8 ves8 voy8 1 150 0 0
+9 ves9 voy9 0 89 0 0
+10 ves10 voy10 1 162 0 0
+11 ves11 voy11 2 262 0 0
+12 ves12 voy12 1 150 0 0
+13 ves13 voy13 0 92 0 0
+14 ves14 voy14 0 80 0 0
+15 ves15 voy15 0 92 0 0
+
+# Vessel Schedule
+# <vessel id> <arrival> <departure> <duration> <delay>
+
+_VES_SCHEDULE
+0 1 10 9 0
+1 5 9 4 0
+2 1 5 4 0
+3 1 9 8 0
+4 2 6 4 0
+5 3 8 5 0
+6 6 8 2 0
+7 8 10 2 0
+8 4 8 4 0
+9 5 7 2 0
+10 1 6 5 0
+11 6 10 4 0
+12 4 7 3 0
+13 2 3 1 0
+14 7 8 1 0
+15 7 9 2 0
