@@ -1,7 +1,7 @@
 #
 # Solution File created by BAPGDYT04Partitioner
-# Date = Mon Oct 15 23:36:38 2012
-# Parameter File = /home/h/harish-l/BAP/BAPS/param/tv.par
+# Date = Mon Oct 29 20:59:19 2012
+# Parameter File = /home/harish/bapm3/BAPS/param/tv.par
 #
 
 _NUM_UNALLOCATED
@@ -11,16 +11,16 @@ _NUM_VESSELS
 209
 
 _OBJECTIVE_VALUE
-85499304
+4380466600
 
 _TRANSHIPMENT_VALUE
 1466600
 
 _PENALTY_VALUE
-84032704
+4379000000
 
 _TIME_TAKEN
-0.066726
+0.006116
 
 # Final Allocation Solution
 # <ves#> <sect> <wharf> <berth time> <departure time>

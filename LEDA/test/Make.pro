@@ -2,10 +2,10 @@
 .SUFFIXES: .asm .s .c .cpp .o .a
 VERS = 
 
-CC      = g++$(VERS) -DLEDA_MULTI_THREAD -pthread -Wall --warn-error
-PLAIN_C = gcc$(VERS) -DLEDA_MULTI_THREAD -pthread -Wall
-CCLIB   = g++$(VERS) -pthread -shared
-LD      = g++$(VERS) -pthread
+CC      = g++$(VERS) -Wall --warn-error
+PLAIN_C = gcc$(VERS) -Wall
+CCLIB   = g++$(VERS) -shared
+LD      = g++$(VERS)
 
 PIC     = -fpic
 CFLAGS  = -O2 -fno-strict-aliasing
