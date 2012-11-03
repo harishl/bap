@@ -15,7 +15,7 @@
 ######################################
 
 _PARTITIONING_ALGO
-GDY
+GP
 
 _RANDOM_SEED
 12345

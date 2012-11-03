@@ -31,8 +31,8 @@
 #include "def.h"
 #include "BAPBase.h"
 #include "BAPPackage.h"
+#include "../partitioning/GP/BAPGPPartitioner.h"
 #include "../partitioning/TV/BAPTVPartitioner.h"
-#include "../partitioning/TV/BAPGDYT04Partitioner.h"
 #include "../packing/BP/BAPBPPacker.h"
 
 class BAPSolver : public BAPBase

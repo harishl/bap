@@ -92,11 +92,14 @@ void BAPSolver::DoPartitioning()
    BAPPartitioner* Partitioner;
 
    if (mPartitioner == "TV") {
-      Partitioner = new BAPTVPartitioner(mPackage);
+      Partitioner = new BAPGPPartitioner(mPackage);
       cout << "BAPSolver.cpp in src";
    }
    else if(mPartitioner == "GDY") {
-	  Partitioner = new BAPGDYT04Partitioner(mPackage);
+	  //Partitioner = new BAPGDYT04Partitioner(mPackage);
+   }
+   else if(mPartitioner == "GP") {
+   	  Partitioner = new BAPGPPartitioner(mPackage);
    }
    else
    {

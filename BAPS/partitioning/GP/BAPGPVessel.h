@@ -22,8 +22,8 @@
  *
  ******************************************************************/
 
-#ifndef __BAP_TV_VESSEL__
-#define __BAP_TV_VESSEL__
+#ifndef __BAP_GP_VESSEL__
+#define __BAP_GP_VESSEL__
 
 
 #include "def.h"
@@ -32,20 +32,19 @@ using std::istream;
 using std::ostream;
 using leda::set;
 
-class TVVessel
+class GPVessel
 {
 public:
-   TVVessel();
-   TVVessel(int anID, int aLength);
-   TVVessel(const TVVessel& aVessel);
-   ~TVVessel();
-   TVVessel& operator=(const TVVessel& aVessel);
+   GPVessel();
+   GPVessel(int anID, int aLength);
+   GPVessel(const GPVessel& aVessel);
+   ~GPVessel();
+   GPVessel& operator=(const GPVessel& aVessel);
    void Print(const int& aWidth = 1, const int& aDetail = 0) const;
 
-   friend   istream& operator>>(istream& anIS, TVVessel& aVessel);
-   friend   ostream& operator<<(ostream& anOS, const TVVessel& aVessel);
-   friend   int compare(const TVVessel& aV1, const TVVessel& aV2);
-   friend	int comapreArrival(const TVVessel& aV1, const TVVessel& aV2);
+   friend   istream& operator>>(istream& anIS, GPVessel& aVessel);
+   friend   ostream& operator<<(ostream& anOS, const GPVessel& aVessel);
+   friend   int compare(const GPVessel& aV1, const GPVessel& aV2);
 
    int      ID() const;
    int      Length() const;

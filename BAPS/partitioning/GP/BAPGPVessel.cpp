@@ -22,13 +22,13 @@
  *
  ******************************************************************/
 
-#include "BAPTVVessel.h"
+#include "BAPGPVessel.h"
 
 using std::cout;
 using std::endl;
 
 
-TVVessel::TVVessel()
+GPVessel::GPVessel()
 : mID(0), mLength(0), mStartTimeZone(0), mEndTimeZone(0), mSection(0),
   mImport(0), mExport(0), mArrival(0), mDeparture(0), mContainers(0),
   mTranshipment(0)
@@ -36,7 +36,7 @@ TVVessel::TVVessel()
 }
 
 
-TVVessel::TVVessel(int anID, int aLength)
+GPVessel::GPVessel(int anID, int aLength)
 : mID(anID), mLength(aLength), mStartTimeZone(0), mEndTimeZone(0),
   mSection(0), mImport(0), mExport(0), mArrival(0), mDeparture(0),
   mContainers(0), mTranshipment(0)
@@ -44,7 +44,7 @@ TVVessel::TVVessel(int anID, int aLength)
 }
 
 
-TVVessel::TVVessel(const TVVessel& aVessel)
+GPVessel::GPVessel(const GPVessel& aVessel)
 : mID(aVessel.mID), mLength(aVessel.mLength),
   mImport(aVessel.mImport), mExport(aVessel.mExport),
   mTranshipment(aVessel.mTranshipment),
@@ -60,12 +60,12 @@ TVVessel::TVVessel(const TVVessel& aVessel)
 }
 
 
-TVVessel::~TVVessel()
+GPVessel::~GPVessel()
 {
 }
 
 
-TVVessel& TVVessel::operator=(const TVVessel& aVessel)
+GPVessel& GPVessel::operator=(const GPVessel& aVessel)
 {
    if (this != &aVessel)
    {
@@ -88,7 +88,7 @@ TVVessel& TVVessel::operator=(const TVVessel& aVessel)
 }
 
 
-void TVVessel::Print(const int& aWidth, const int& aDetail) const
+void GPVessel::Print(const int& aWidth, const int& aDetail) const
 {
    cout  << "TVVessel" << setw(5) << mID
          << ", length =" << setw(4) << mLength
@@ -125,108 +125,103 @@ void TVVessel::Print(const int& aWidth, const int& aDetail) const
 }
 
 
-istream& operator>>(istream& anIS, TVVessel& aVessel)
+istream& operator>>(istream& anIS, GPVessel& aVessel)
 {
    return anIS;
 }
 
 
-ostream& operator<<(ostream& anOS, const TVVessel& aVessel)
+ostream& operator<<(ostream& anOS, const GPVessel& aVessel)
 {
    return anOS << "vessel " << setw(3) << aVessel.mID;
 }
 
 
-int compare(const TVVessel& aV1, const TVVessel& aV2)
+int compare(const GPVessel& aV1, const GPVessel& aV2)
 {
    return compare(aV1.mID, aV2.mID);
 }
 
-int compareArrival(const TVVessel& aV1, const TVVessel& aV2)
-{
-   return compare(aV1.Arrival(), aV2.Arrival());
-}
 
-
-int TVVessel::ID() const
+int GPVessel::ID() const
 {
    return mID;
 }
 
 
-int TVVessel::Length() const
+int GPVessel::Length() const
 {
    return mLength;
 }
 
 
-int TVVessel::Import() const
+int GPVessel::Import() const
 {
    return mImport;
 }
 
 
-int TVVessel::Export() const
+int GPVessel::Export() const
 {
    return mExport;
 }
 
 
-int TVVessel::Transhipment() const
+int GPVessel::Transhipment() const
 {
    return mTranshipment;
 }
 
 
-int TVVessel::Containers() const
+int GPVessel::Containers() const
 {
    return mContainers;
 }
 
 
-int TVVessel::StartTimeZone() const
+int GPVessel::StartTimeZone() const
 {
    return mStartTimeZone;
 }
 
 
-int TVVessel::EndTimeZone() const
+int GPVessel::EndTimeZone() const
 {
    return mEndTimeZone;
 }
 
 
-int TVVessel::Arrival() const
+int GPVessel::Arrival() const
 {
    return mArrival;
 }
 
 
-int TVVessel::Departure() const
+int GPVessel::Departure() const
 {
    return mDeparture;
 }
 
 
-int TVVessel::Section() const
+int GPVessel::Section() const
 {
    return mSection;
 }
 
 
-const set<int>& TVVessel::Neighbours() const
+const set<int>& GPVessel::Neighbours() const
 {
    return mNeighbours;
 }
 
 
-const set<int>& TVVessel::Destinations() const
+const set<int>& GPVessel::Destinations() const
 {
    return mPotentialDestinations;
 }
 
 
-int TVVessel::Import(int aNumContainers)
+int GPVessel::Import(int aNumContainers)
 {
    mContainers += aNumContainers;
    mImport = aNumContainers;
@@ -234,7 +229,7 @@ int TVVessel::Import(int aNumContainers)
 }
 
 
-int TVVessel::Export(int aNumContainers)
+int GPVessel::Export(int aNumContainers)
 {
    mContainers += aNumContainers;
    mExport = aNumContainers;
@@ -242,62 +237,62 @@ int TVVessel::Export(int aNumContainers)
 }
 
 
-void TVVessel::AddTranshipment(int aNumContainers)
+void GPVessel::AddTranshipment(int aNumContainers)
 {
    mContainers += aNumContainers;
    mTranshipment += aNumContainers;
 }
 
 
-int TVVessel::StartTimeZone(int aTimeZone)
+int GPVessel::StartTimeZone(int aTimeZone)
 {
    mStartTimeZone = aTimeZone;
    return mStartTimeZone;
 }
 
 
-int TVVessel::EndTimeZone(int aTimeZone)
+int GPVessel::EndTimeZone(int aTimeZone)
 {
    mEndTimeZone = aTimeZone;
    return mEndTimeZone;
 }
 
 
-int TVVessel::Arrival(int aTime)
+int GPVessel::Arrival(int aTime)
 {
    mArrival = aTime;
    return mArrival;
 }
 
 
-int TVVessel::Departure(int aTime)
+int GPVessel::Departure(int aTime)
 {
    mDeparture = aTime;
    return mDeparture;
 }
 
 
-int TVVessel::Section(int aSection)
+int GPVessel::Section(int aSection)
 {
    mSection = aSection;
    return mSection;
 }
 
 
-void TVVessel::AddNeighbour(int aVessel)
+void GPVessel::AddNeighbour(int aVessel)
 {
    assert(!mNeighbours.member(aVessel));
    mNeighbours.insert(aVessel);
 }
 
 
-void TVVessel::AddDestination(int aSection)
+void GPVessel::AddDestination(int aSection)
 {
    mPotentialDestinations.insert(aSection);
 }
 
 
-void TVVessel::RemoveDestination(int aSection)
+void GPVessel::RemoveDestination(int aSection)
 {
    assert(mPotentialDestinations.member(aSection));
    mPotentialDestinations.del(aSection);

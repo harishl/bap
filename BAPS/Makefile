@@ -23,8 +23,9 @@ INCL_DIR = $(BAPHOME)/include
 ###
 # Partitioning modules
 ###
+GP = $(LIB_DIR)/libGP.a
 TV = $(LIB_DIR)/libTV.a
-PART = $(TV)
+PART = $(GP)
 
 ###
 # Packing modules
@@ -48,7 +49,8 @@ OBJS = $(PART) $(PACK) $(SOLVER) $(BAPS_LIB)
 #       must be: -lSolver -lBP -lTV -lBAPS -lG -lL -lm
 #       else cannot link properly
 ###
-LIBS = -lSolver -lBP -lTV -lBAPS -lleda -lX11
+LIBS = -lSolver -lBP -lGP -lBAPS -lleda -lX11
+#LIBS = -lSolver -lBP -lTV -lBAPS -lleda -lX11
 BAPS = $(BIN_DIR)/BAPS
 
 .cpp.o:
@@ -61,16 +63,20 @@ BAPS = $(BIN_DIR)/BAPS
 ###############################
 $(BAPS) : $(OBJS)
 	@echo "	compiling/linking BAPS 2.0"
-	cd src; dmake baps; cd ..
+	cd src; make baps; cd ..
 	$(CC) $(CCFLAGS) src/baps.o -o $@ -I$(INCL_DIR) -L$(LIB_DIR) -L$(LFLAGS) $(LIBS)
 
 
 ###############################
 # Partitioning modules
 ###############################
+$(GP) :
+	@echo "	checking GP $(GP)"
+	cd partitioning/GP; make; cd ../..
+	
 $(TV) :
 	@echo "	checking tv $(TV)"
-	cd partitioning/TV; dmake; cd ../..
+	cd partitioning/TV; make; cd ../..
 
 
 ###############################
@@ -78,18 +84,18 @@ $(TV) :
 ###############################
 $(BP) :
 	@echo "	checking bp $(BP)"
-	cd packing/BP; dmake; cd ../..
+	cd packing/BP; make; cd ../..
 
 ###############################
 # BAPS v2.0 modules
 ###############################
 $(SOLVER) :
 	@echo "	checking solver $(SOLVER)"
-	cd src; dmake solver; cd ..
+	cd src; make solver; cd ..
 
 $(BAPS_LIB) :
 	@echo "	checking $(BAPS_LIB)"
-	cd src; dmake; cd ..
+	cd src; make; cd ..
 
 
 tar:
@@ -98,12 +104,14 @@ tar:
 
 clean:
 	@echo "  cleaning $(BAPS_LIB) and $(SOLVER)"
-	cd src; dmake clean; cd ../lib; dmake clean; cd ..
+	cd src; make clean; cd ../lib; make clean; cd ..
 	rm -rf *~ *.bak *.out *.o core
+	@echo "  cleaning $(GP)"
+	cd partitioning/GP; make clean; cd ../..
 	@echo "  cleaning $(TV)"
-	cd partitioning/TV; dmake clean; cd ../..
+	cd partitioning/TV; make clean; cd ../..
 	@echo "  cleaning $(BP)"
-	cd packing/BP; dmake clean; cd ../..
+	cd packing/BP; make clean; cd ../..
 
 check:
 	test/test.sh

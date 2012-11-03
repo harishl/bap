@@ -25,7 +25,6 @@ public:
    void Solve();
    // Debugging facility
    void Print(const int& aWidth = 1, const int& aDetail = 0) const;
-//   int compareArrival(const TVVessel& aV1, const TVVessel& aV2);
 
 private:
    // I/O methods
