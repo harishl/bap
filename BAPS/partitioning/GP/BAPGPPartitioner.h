@@ -3,16 +3,29 @@
 #include "BAPPartitioner.h"
 #include "BAPGPSection.h"
 #include "BAPGPVessel.h"
-#include <LEDA/core/list.h>
-#include <LEDA/core/random_source.h>
+#include "/home/harish/bapm3/LEDA/incl/LEDA/core/list.h"
+#include "/home/harish/bapm3/LEDA/incl/LEDA/core/array.h"
+#include "/home/harish/bapm3/LEDA/incl/LEDA/core/random_source.h"
 #include <sys/time.h>
 #include </usr/include/time.h>
 
 using leda::random_source;
+using leda::list;
+using leda::array;
 
 // Using LEDA's random source type
 typedef random_source Random;
 
+struct TP {
+	int timePoint;
+	bool isArrival;
+	int vesselNumber;
+};
+
+struct TimeZone {
+	int start;
+	int end;
+};
 
 class BAPGPPartitioner : public BAPPartitioner
 {
@@ -45,6 +58,7 @@ private:
    unsigned long CalcObjVal() const;
    void ComputeObjVal(unsigned long& aTrans, unsigned long& aPenalty) const;
    void GenerateInitialSolution();
+   void PlaneSweep();
    void GenSolnRandom();
    inline bool GotMoreMoves() const;
    void InitSolution();
