@@ -259,75 +259,6 @@ unsigned int BAPGPPartitioner::D(const int& s1, const int& s2) const
       return LONGDISTANCE;
 }
 
-/*void BAPGPPartitioner::PlaneSweep() {
-
-	array<int> arrivals = mPackage.Arrivals(), departures = mPackage.Departures();
-	list<TP> timePoints;
-	TP* tp;
-	for( int a = 1; a < arrivals.size(); a++) {
-		tp = new TP();
-		tp->timePoint = arrivals[a];
-		tp->vesselNumber = a;
-		tp->isArrival = true;
-		timePoints.append(*tp);
-	}
-
-	for( int d = 1; d < arrivals.size(); d++) {
-		tp = new TP();
-		tp->timePoint = departures[d];
-		tp->vesselNumber = d;
-		tp->isArrival = false;
-		timePoints.append(*tp);
-	}
-
-	timePoints.sort(&compareTP);
-
-	cout << "\narrivals.size() = " << arrivals.size()
-		 << "\ndepartures.size() = " << departures.size() << endl;
-
-	cout << "\ntimePoints.size() = " << timePoints.size() << endl;
-
- 	TP timePt;
-
- 	int st;
- 	bool depart;
- 	bool initialized = false;
- 	forall(timePt, timePoints)
- 	{
- 		if (!initialized)
- 		{
- 			st = timePt.timePoint;
- 			depart = false;
- 			initialized = true;
- 		}
- 		else
- 		{
- 			 cout << "TimePoint: {" << timePt.timePoint << ", "
-								<< timePt.vesselNumber << ", "
-								<< (timePt.isArrival? "Arrival":"Departure")
-								<< "}" << endl;
-
-			if (!timePt.isArrival) depart = true;
-			if((timePt.isArrival && depart))
-			{
-				TimeZone tz;// = new TimeZone();
-				tz.start = st;
-				tz.end = timePt.timePoint;
-				timeZones.append(tz);
-				cout << "TimeZones: [" << tz.start << ", " << tz.end << "]" << endl;
-				st = timePt.timePoint;
-				depart = false;
-			}
- 		}
-	}
-
- 	TimeZone tz; // = new TimeZone();
- 	tz.start = st;
- 	tz.end = timePoints[timePoints.last()].timePoint;
- 	timeZones.append(tz);
- 	cout << "TimeZones: [" << tz.start << ", " << tz.end << "]" << endl;
-}*/
-
 unsigned int BAPGPPartitioner::D(const GPSection& s1, const GPSection& s2) const
 {
    if (s1.ID() >= 0  &&  s2.ID() >= 0) // take port into account also
@@ -579,10 +510,48 @@ void BAPGPPartitioner::GenSolnRandom()
 
 void BAPGPPartitioner::GenSolnZoneDensity() {
 	// List of candidate vessels for allocation
-	array<int>  V(1, mNumVes);
+	/*array<int>  V(1, mNumVes);
 	for (int i = 1; i <= mNumVes; i++)
-	   V[i] = i;                        // set content to vessel ID
+	   V[i] = i;  */ // set content to vessel ID
+	int numVessels, totalNumVessels;
+	totalNumVessels = mPackage.NumVessels();
+	p_queue<int, int> PQ, PQ_ves;
+	array<IntPair> tz = mPackage.TimeZones();
+	for(int i = 1; i <= mPackage.NumTimeZones(); i++) {
+		numVessels = mPackage.numVesselsInTimeZone(i);
+		cout << i << " : [" << tz[i].Start() << ", " << tz[i].End() << "] : " << numVessels << endl;
+		PQ.insert(totalNumVessels - numVessels, i);
+	}
 
+	pq_item it, itVes;
+	set<int> vesInTZ;
+	int vesID, totalNumTZ = tz.size();
+	while (!PQ.empty()) {
+		// Select busiest time zone
+		it = PQ.find_min();
+
+		//cout << "[" << PQ.prio(it) << ", " << PQ.inf(it) << "] " << endl;
+		// Get set of vessels in this timezone
+		vesInTZ = mPackage.Vessels(PQ.inf(it));
+		forall(vesID, vesInTZ)
+		{
+			PQ_ves.insert(totalNumTZ - mPackage.numTimeZonesForVessel(vesID), vesID);
+		}
+
+		while (!PQ_ves.empty()) {
+			// get the vessel occupying the most number of time zones
+			itVes = PQ_ves.find_min();
+			//cout << "[" << PQ_ves.prio(itVes) << ", " << PQ_ves.inf(itVes) << "] " << endl;
+			int vID = PQ_ves.inf(itVes);
+			if(mVes[vID].Section() == UNASSIGNED) {
+				AssignVesselToMaxFlowSection(mVes[vID]);
+			}
+			PQ_ves.del_item(itVes);
+
+		}
+		PQ.del_item(it);
+	}
+	cout << "mUnallocVes = " << mUnallocVes.size() << "\n remainingVessels = " << totalNumVessels << endl;
 }
 
 // Assigns Vessel v to a random section
@@ -621,6 +590,35 @@ void BAPGPPartitioner::AssignVesselToRandomSection(GPVessel& v)
    }
 }
 
+void BAPGPPartitioner::AssignVesselToMaxFlowSection(GPVessel& v) {
+	int vID = v.ID(), chosenSectionID;
+	int maxFlow;
+	array<int> flow(1, mSect.size());
+	for(int i = 1; i <= flow.size(); i++) {
+		flow[i] = computeFlowWithinSection(vID, i);
+	}
+
+	for(int k = 1; k <= flow.size(); k++) {
+		cout << "vessel " << vID << " has a flow of " << flow[k] << " for section " << k << ".\n";
+	}
+
+	do {
+		maxFlow = -10;
+		for(int k = 1; k <= flow.size(); k++) {
+			if(maxFlow < flow[k]) {
+				maxFlow = flow[k];
+				chosenSectionID = k;
+			}
+		}
+		if(maxFlow != -1) {
+			cout << "chosenSection is " << chosenSectionID << " because it had flow = " << maxFlow << endl;
+			flow[chosenSectionID] = -1; // so that it will not be chosen again
+			if(mSect[chosenSectionID].CanAccommodate(v)) {
+				Assign(mVes[vID], mSect[chosenSectionID]);
+			}
+		}
+	} while (mUnallocVes.member(vID) && maxFlow != -1);
+}
 
 void BAPGPPartitioner::Assign(GPVessel& v, GPSection& s)
 {
@@ -628,6 +626,19 @@ void BAPGPPartitioner::Assign(GPVessel& v, GPSection& s)
    v.RemoveDestination(s.ID());
    s.Add(v);
    mUnallocVes.del(v.ID());
+}
+
+int BAPGPPartitioner::computeFlowWithinSection(int vID, int sID) {
+	int vesID, flow = 0;
+
+	const set<int>& vesselsInSect = mSect[sID].Vessels();
+	forall(vesID, vesselsInSect) {
+		if(mVes[vID].Neighbours().member(vesID)) {
+			flow += TotalFlow(vID, vesID);
+		}
+	}
+	// cout << "flow: vID -> SID = " << flow << endl;
+	return flow;
 }
 
 

@@ -5,13 +5,22 @@
 #include "BAPGPVessel.h"
 #include "/home/harish/bapm3/LEDA/incl/LEDA/core/list.h"
 #include "/home/harish/bapm3/LEDA/incl/LEDA/core/array.h"
+#include "/home/harish/bapm3/LEDA/incl/LEDA/core/array2.h"
 #include "/home/harish/bapm3/LEDA/incl/LEDA/core/random_source.h"
+#include "/home/harish/bapm3/LEDA/incl/LEDA/core/p_queue.h"
+#include "/home/harish/bapm3/LEDA/incl/LEDA/core/set.h"
+#include "/home/harish/bapm3/LEDA/incl/LEDA/core/impl/bin_heap.h"
 #include <sys/time.h>
 #include </usr/include/time.h>
 
 using leda::random_source;
 using leda::list;
 using leda::array;
+using leda::p_queue;
+using leda::pq_item;
+using leda::string;
+using leda::set;
+using leda::array2;
 
 // Using LEDA's random source type
 typedef random_source Random;
@@ -55,6 +64,8 @@ private:
    // Abstractions
    void Assign(GPVessel& v, GPSection& s);
    void AssignVesselToRandomSection(GPVessel& v);
+   void AssignVesselToMaxFlowSection(GPVessel& v);
+   int computeFlowWithinSection(int vID, int sID);
    void CalcInitialObjVal();
    unsigned long CalcObjVal() const;
    void ComputeObjVal(unsigned long& aTrans, unsigned long& aPenalty) const;

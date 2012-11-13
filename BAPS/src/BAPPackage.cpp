@@ -863,6 +863,11 @@ array<IntPair> BAPPackage::TimeZones() const
    return (*mTimeZones);
 }
 
+int BAPPackage::numTimeZonesForVessel(int aVesselID) const
+{
+	return mTimeZonesByVessel[aVesselID].size();
+}
+
 set<int> BAPPackage::TimeZones(int aVesselID) const
 {
    return mTimeZonesByVessel[aVesselID];
@@ -881,6 +886,11 @@ int BAPPackage::Departure(int aVesselID) const
 set<int> BAPPackage::Vessels(int aTimeZoneID) const
 {
    return mVesselsInTimeZone[aTimeZoneID];
+}
+
+int BAPPackage::numVesselsInTimeZone(int aTimeZoneID) const
+{
+   return (mVesselsInTimeZone[aTimeZoneID]).size();
 }
 
 int BAPPackage::StartTimeZone(int aVesselID) const

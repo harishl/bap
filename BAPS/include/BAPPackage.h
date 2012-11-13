@@ -159,8 +159,12 @@ public:
    array<IntPair> TimeZones() const;
    // returns the set of time zones spanned by the given vessel
    set<int>       TimeZones(int aVesselID) const;
+   // returns the number of vessels in the given time zone
+   int			  numTimeZonesForVessel(int aVesselID) const;
    // returns the set of vessels in the given time zone
    set<int>       Vessels(int aTimeZoneID) const;
+   // returns the number of vessels in the given time zone
+   int			  numVesselsInTimeZone(int aTimeZoneID) const;
    // returns the start (first) time zone of the given vessel
    int            StartTimeZone(int aVesselID) const;
    // returns the end (last) time zone of the given vessel
