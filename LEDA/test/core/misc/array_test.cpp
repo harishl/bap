@@ -46,6 +46,13 @@ int main ()
   array<double>  A2(N);
 
   for(i=0; i<N; i++) A[i] = rand_int(0,100000);
+  for(int i = 0; i < A.size(); i++) {
+	  cout << endl << A[i];
+  }
+  A.sort();
+  for(int i = 0; i < A.size(); i++) {
+	  cout << endl << A[i];
+  }
 
   cout << string("  %5.3f sec",used_time(T));
   cout << endl;

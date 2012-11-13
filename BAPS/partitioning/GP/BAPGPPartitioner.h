@@ -16,13 +16,15 @@ using leda::array;
 // Using LEDA's random source type
 typedef random_source Random;
 
-struct TP {
+class TP {
+public:
 	int timePoint;
 	bool isArrival;
 	int vesselNumber;
 };
 
-struct TimeZone {
+class TimeZone {
+public:
 	int start;
 	int end;
 };
@@ -36,7 +38,6 @@ public:
    void Solve();
    // Debugging facility
    void Print(const int& aWidth = 1, const int& aDetail = 0) const;
-
 
 private:
    // I/O methods
@@ -58,8 +59,9 @@ private:
    unsigned long CalcObjVal() const;
    void ComputeObjVal(unsigned long& aTrans, unsigned long& aPenalty) const;
    void GenerateInitialSolution();
-   void PlaneSweep();
+   //void PlaneSweep();
    void GenSolnRandom();
+   void GenSolnZoneDensity();
    inline bool GotMoreMoves() const;
    void InitSolution();
    void ResetVesselDestinations();

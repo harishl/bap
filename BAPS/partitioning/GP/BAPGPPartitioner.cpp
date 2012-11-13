@@ -8,6 +8,18 @@ using std::ofstream;
 using std::ios;
 using std::setprecision;
 
+int compareTP(const TP& tp1, const TP& tp2) {
+	int result = 0;
+	if(tp1.timePoint == tp2.timePoint) {
+		if(!tp1.isArrival) {
+			result = tp1.timePoint;
+		}
+	}
+	else {
+		result = tp1.timePoint - tp2.timePoint;
+	}
+	return result;
+}
 
 BAPGPPartitioner::BAPGPPartitioner(BAPPackage& aPackage)
 :  BAPPartitioner(aPackage),           // init base class
@@ -65,7 +77,6 @@ BAPGPPartitioner::BAPGPPartitioner(BAPPackage& aPackage)
 
 BAPGPPartitioner::~BAPGPPartitioner()
 {
-   // nothing to do
 }
 
 
@@ -153,7 +164,6 @@ void BAPGPPartitioner::InitSolution()
    }
 
    ResetVesselDestinations();
-   PlaneSweep();
 }
 
 void BAPGPPartitioner::ResetVesselDestinations()
@@ -249,120 +259,74 @@ unsigned int BAPGPPartitioner::D(const int& s1, const int& s2) const
       return LONGDISTANCE;
 }
 
-void BAPGPPartitioner::PlaneSweep() {
+/*void BAPGPPartitioner::PlaneSweep() {
+
 	array<int> arrivals = mPackage.Arrivals(), departures = mPackage.Departures();
-	arrivals.sort(); departures.sort();
-	list<TP*> timePoints;
-	int a = 0, d = 0;
+	list<TP> timePoints;
+	TP* tp;
+	for( int a = 1; a < arrivals.size(); a++) {
+		tp = new TP();
+		tp->timePoint = arrivals[a];
+		tp->vesselNumber = a;
+		tp->isArrival = true;
+		timePoints.append(*tp);
+	}
+
+	for( int d = 1; d < arrivals.size(); d++) {
+		tp = new TP();
+		tp->timePoint = departures[d];
+		tp->vesselNumber = d;
+		tp->isArrival = false;
+		timePoints.append(*tp);
+	}
+
+	timePoints.sort(&compareTP);
 
 	cout << "\narrivals.size() = " << arrivals.size()
 		 << "\ndepartures.size() = " << departures.size() << endl;
-	while (a < arrivals.size() || d < departures.size())
-	{
-		TP* tp = new TP();
-		if(a < arrivals.size() && d < departures.size())
-		{
-			if(arrivals[a] == departures[d])
-			{
-				// putting departures before arrivals
-				tp->timePoint = departures[d];
-				tp->vesselNumber = d;
-				tp->isArrival = false;
-				d++;
-				timePoints.append(tp);
-
-				tp = new TP();
-				tp->timePoint = arrivals[a];
-				tp->vesselNumber = a;
-				tp->isArrival = true;
-				a++;
-				timePoints.append(tp);
-			}
-			else if(arrivals[a] < departures[d])
-			{
-				tp->timePoint = arrivals[a];
-				tp->vesselNumber = a;
-				tp->isArrival = true;
-				a++;
-				timePoints.append(tp);
-			}
-			else
-			{
-				tp->timePoint = departures[d];
-				tp->vesselNumber = d;
-				tp->isArrival = false;
-				d++;
-				timePoints.append(tp);
-			}
-		}
-		else if (a < arrivals.size())
-		{
-			tp->timePoint = arrivals[a];
-			tp->vesselNumber = a;
-			tp->isArrival = true;
-			a++;
-		}
-		else
-		{
-			tp->timePoint = departures[d];
-			tp->vesselNumber = d;
-			tp->isArrival = false;
-			d++;
-		}
-	}
 
 	cout << "\ntimePoints.size() = " << timePoints.size() << endl;
- 	list<TimeZone*> timeZones;
- 	list<TP*>::item it = timePoints.first();
- 	TP* timePt;
+
+ 	TP timePt;
 
  	int st;
  	bool depart;
-
+ 	bool initialized = false;
  	forall(timePt, timePoints)
  	{
- 		if (timePt == timePoints.front() || timePt == timePoints[timePoints[1]])
+ 		if (!initialized)
  		{
- 			// do nothing
-			cout << "timePt == timePoints.front() || timePt == timePoints[timePoints.first()+1] "
-					<< "TimePoint: {" << timePt->timePoint << ","
-								<< timePt->vesselNumber << ", "
-								<< (timePt->isArrival? "Arrival":"Departure")
-								<< "}" << endl;
- 		}
- 		else if (timePt == timePoints[timePoints[2]])
- 		{
-			cout << "timePt == timePoints[timePoints.first()+2]"
-					<< "TimePoint: {" << timePt->timePoint << ","
-								<< timePt->vesselNumber << ", "
-								<< (timePt->isArrival? "Arrival":"Departure")
-								<< "}" << endl;
- 			st = timePt->timePoint;
+ 			st = timePt.timePoint;
  			depart = false;
+ 			initialized = true;
  		}
  		else
  		{
-			cout << "TimePoint: {" << timePt->timePoint << ","
-								<< timePt->vesselNumber << ", "
-								<< (timePt->isArrival? "Arrival":"Departure")
+ 			 cout << "TimePoint: {" << timePt.timePoint << ", "
+								<< timePt.vesselNumber << ", "
+								<< (timePt.isArrival? "Arrival":"Departure")
 								<< "}" << endl;
 
-			if (!timePt->isArrival) depart = true;
-			if(timePt->isArrival && depart)
+			if (!timePt.isArrival) depart = true;
+			if((timePt.isArrival && depart))
 			{
-				if(st < timePt->timePoint) {
-					TimeZone* tz = new TimeZone();
-					tz->start = st;
-					tz->end = timePt->timePoint;
-					timeZones.append(tz);
-					cout << "TimeZone: [" << tz->start << ", " << tz->end << "]" << endl;
-					st = timePt->timePoint;
-					depart = false;
-				}
+				TimeZone tz;// = new TimeZone();
+				tz.start = st;
+				tz.end = timePt.timePoint;
+				timeZones.append(tz);
+				cout << "TimeZones: [" << tz.start << ", " << tz.end << "]" << endl;
+				st = timePt.timePoint;
+				depart = false;
 			}
  		}
 	}
-}
+
+ 	TimeZone tz; // = new TimeZone();
+ 	tz.start = st;
+ 	tz.end = timePoints[timePoints.last()].timePoint;
+ 	timeZones.append(tz);
+ 	cout << "TimeZones: [" << tz.start << ", " << tz.end << "]" << endl;
+}*/
 
 unsigned int BAPGPPartitioner::D(const GPSection& s1, const GPSection& s2) const
 {
@@ -581,7 +545,8 @@ string BAPGPPartitioner::Date() const
 void BAPGPPartitioner::GenerateInitialSolution()
 {
    InitSolution();
-   GenSolnRandom();
+   //GenSolnRandom();
+   GenSolnZoneDensity();
 }
 
 
@@ -612,6 +577,13 @@ void BAPGPPartitioner::GenSolnRandom()
    }
 }
 
+void BAPGPPartitioner::GenSolnZoneDensity() {
+	// List of candidate vessels for allocation
+	array<int>  V(1, mNumVes);
+	for (int i = 1; i <= mNumVes; i++)
+	   V[i] = i;                        // set content to vessel ID
+
+}
 
 // Assigns Vessel v to a random section
 //   Alg: save the candidate destination sections
