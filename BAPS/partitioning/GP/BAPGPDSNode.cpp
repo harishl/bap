@@ -7,7 +7,7 @@
 
 #include "BAPGPDSNode.h"
 
-BAPGPDSNode::BAPGPDSNode() {
+BAPGPDSNode::BAPGPDSNode(): left(NULL), right(NULL) {
 	// TODO Auto-generated constructor stub
 
 }

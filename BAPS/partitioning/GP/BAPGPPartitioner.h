@@ -3,6 +3,7 @@
 #include "BAPPartitioner.h"
 #include "BAPGPSection.h"
 #include "BAPGPVessel.h"
+#include "BAPGPDS.h"
 #include "/home/harish/bapm3/LEDA/incl/LEDA/core/list.h"
 #include "/home/harish/bapm3/LEDA/incl/LEDA/core/array.h"
 #include "/home/harish/bapm3/LEDA/incl/LEDA/core/array2.h"
@@ -69,7 +70,10 @@ private:
    void CalcInitialObjVal();
    unsigned long CalcObjVal() const;
    void ComputeObjVal(unsigned long& aTrans, unsigned long& aPenalty) const;
+   unsigned int ComputeGain(int v, int s);
    void GenerateInitialSolution();
+   void ImproveSolution();
+   void InitializeBucketDS();
    //void PlaneSweep();
    void GenSolnRandom();
    void GenSolnZoneDensity();
@@ -116,5 +120,6 @@ private:
    array2<int>    mDist;
    set<int>       mUnallocVes;
    Random         mRandom;
+   BAPGPDS        bucketDS;
 };
 

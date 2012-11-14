@@ -18,12 +18,13 @@ using std::iostream;
 
 BAPGPDS::BAPGPDS(int noV, int noS) :
 		noOfVessels(noV), noOfSections(noS), lookUp(
-				array2<BAPGPDSMoveNode*>(1, noOfVessels, 1, noOfSections)) {
+				array2<BAPGPDSMoveNode*>(1, noOfVessels, 1, noOfSections)),
+				MaxGainPtr(NULL) {
 	//MaxGainPtr=new BAPGPDSGainIndexNode();
 	cout << "MaxGainPtr:" << MaxGainPtr << "\n";
 }
 void BAPGPDS::insertCellNode(BAPGPDSNode* iterNode, BAPGPDSNode* cellNode) {
-	while (iterNode->right != 0) {
+	while (iterNode->right != NULL) {
 		iterNode = iterNode->right;
 	}
 	iterNode->right = cellNode;
@@ -39,21 +40,34 @@ BAPGPDSMoveNode* BAPGPDS::createCellNode(int vid, int sid,
 	return cellNode;
 }
 void BAPGPDS::insert(int vid, int sectid, int gain) {
-	if (gain > MaxGainPtr->gain) {
+	cout << "inserting [" << vid << ", " << sectid << ", " << gain  << "]" << endl;
+	if (MaxGainPtr == NULL) {
+			insertFirstNode(vid, sectid, gain);
+	}
+	else if (gain > MaxGainPtr->gain) {
 		insertMoveNodeAboveMaxGainNode(vid, sectid, gain);
 	} else if (gain == MaxGainPtr->gain) {
 		insertMoveNodeAtMaximumGainNode(vid, sectid);
 	} else if (gain < MaxGainPtr->gain) {
+		cout << "MaxGainPtr->gain " << MaxGainPtr->gain << "\n MaxGainPtr->left " << MaxGainPtr->left << endl;
+		if(MaxGainPtr->left == NULL) {
+			BAPGPDSGainIndexNode* gainNode = new BAPGPDSGainIndexNode();
+			BAPGPDSMoveNode* cellNode = createCellNode(vid, sectid, gainNode);
+			insertMoveNodeForNonExisingGainNodeAtEnd(vid, sectid, MaxGainPtr, gain,gainNode, cellNode);
+		}
+		else {
 		BAPGPDSGainIndexNode* node =
-				dynamic_cast<BAPGPDSGainIndexNode*>(MaxGainPtr->right);
-		while (node->right != 0) {
+				dynamic_cast<BAPGPDSGainIndexNode*>(MaxGainPtr->left);
+		while (node->left != NULL) {
 			if (gain >= node->gain)
 				break;
-			node = dynamic_cast<BAPGPDSGainIndexNode*>(node->right);
+			node = dynamic_cast<BAPGPDSGainIndexNode*>(node->left);
 		}
+
 		if (gain == node->gain) {
 			insertMoveNodeForExisingGainNode(vid, sectid, node);
 		} else if (gain > node->gain) {
+			cout << "node->gain" << node->gain << endl;
 			BAPGPDSGainIndexNode* gainNode = new BAPGPDSGainIndexNode();
 			BAPGPDSMoveNode* cellNode = createCellNode(vid, sectid, gainNode);
 			insertMoveNodeForNonExisingGainNode(vid, sectid, node, gain,
@@ -64,9 +78,7 @@ void BAPGPDS::insert(int vid, int sectid, int gain) {
 			insertMoveNodeForNonExisingGainNodeAtEnd(vid, sectid, node, gain,
 					gainNode, cellNode);
 		}
-
-	} else if (MaxGainPtr == 0) {
-		insertFirstNode(vid, sectid, gain);
+		}
 	}
 }
 void BAPGPDS::insertMoveNodeAtMaximumGainNode(int vid, int sectid) {
@@ -79,9 +91,10 @@ void BAPGPDS::insertMoveNodeAboveMaxGainNode(int vid, int sectid,
 		long int gain) {
 	BAPGPDSGainIndexNode* gainNode = new BAPGPDSGainIndexNode();
 	gainNode->gain = gain;
-	gainNode->left = MaxGainPtr;
 	MaxGainPtr->right = gainNode;
+	gainNode->left = MaxGainPtr;
 	MaxGainPtr = gainNode;
+
 	BAPGPDSMoveNode* cellNode = createCellNode(vid, sectid, MaxGainPtr);
 	cellNode->left = MaxGainPtr;
 	lookUp(vid, sectid) = cellNode;
@@ -109,8 +122,10 @@ void BAPGPDS::insertMoveNodeForNonExisingGainNodeAtEnd(int vid, int sectid,
 void BAPGPDS::insertMoveNodeForNonExisingGainNode(int vid, int sectid,
 		BAPGPDSGainIndexNode* node, long int gain,
 		BAPGPDSGainIndexNode* gainNode, BAPGPDSMoveNode* cellNode) {
+	cout << "\n node->gain" << node->gain << endl;
 
 	gainNode->gain = gain;
+	//cout << "gainNode->gain = " << gainNode->gain;
 	gainNode->left = node->left;
 	gainNode->right = node;
 	node->left = gainNode;
@@ -137,11 +152,11 @@ void BAPGPDS::updateCellNode(int vid, int sectid, int gain) {
 		insertCellNode(MaxGainPtr->moveNode, cellNode);
 	} else if (gain < MaxGainPtr->gain) {
 		BAPGPDSGainIndexNode* node =
-				dynamic_cast<BAPGPDSGainIndexNode*>(MaxGainPtr->right);
-		while (node->right != 0) {
+				dynamic_cast<BAPGPDSGainIndexNode*>(MaxGainPtr->left);
+		while (node->left != NULL) {
 			if (gain >= node->gain)
 				break;
-			node = dynamic_cast<BAPGPDSGainIndexNode*>(node->right);
+			node = dynamic_cast<BAPGPDSGainIndexNode*>(node->left);
 		}
 		if (gain == node->gain) {
 			BAPGPDSMoveNode* cellNode = lookUp(vid, sectid);

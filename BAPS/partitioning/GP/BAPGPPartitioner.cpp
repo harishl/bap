@@ -31,7 +31,8 @@ BAPGPPartitioner::BAPGPPartitioner(BAPPackage& aPackage)
    mDist(aPackage.Distances()),
    mTraceFile(mPackage.PartitioningTraceFilename()),
    mRuntimeAnalyzer(0),
-   mSolnExists(false)
+   mSolnExists(false),
+   bucketDS(mNumVes, mNumSect)
 {
    gettimeofday(&mStartTime, NULL);
    array<int>  temp;
@@ -126,6 +127,7 @@ void BAPGPPartitioner::Solve()
 
    GenerateInitialSolution();
    CalcInitialObjVal();
+   ImproveSolution();
 
    gettimeofday(&mEndTime, NULL);
 
@@ -514,7 +516,7 @@ void BAPGPPartitioner::GenSolnZoneDensity() {
 	for (int i = 1; i <= mNumVes; i++)
 	   V[i] = i;  */ // set content to vessel ID
 	int numVessels, totalNumVessels;
-	totalNumVessels = mPackage.NumVessels();
+	totalNumVessels = mNumVes;
 	p_queue<int, int> PQ, PQ_ves;
 	array<IntPair> tz = mPackage.TimeZones();
 	for(int i = 1; i <= mPackage.NumTimeZones(); i++) {
@@ -551,7 +553,13 @@ void BAPGPPartitioner::GenSolnZoneDensity() {
 		}
 		PQ.del_item(it);
 	}
-	cout << "mUnallocVes = " << mUnallocVes.size() << "\n remainingVessels = " << totalNumVessels << endl;
+	cout << "mUnallocVes = " << mUnallocVes.size() << endl;
+	GPVessel v;
+
+	forall(v, mVes)
+	{
+		cout << "{ " << v.ID() << ", " << v.Section() << "}" << endl;
+	}
 }
 
 // Assigns Vessel v to a random section
@@ -641,4 +649,29 @@ int BAPGPPartitioner::computeFlowWithinSection(int vID, int sID) {
 	return flow;
 }
 
+unsigned int BAPGPPartitioner::ComputeGain(int v, int s) {
+	unsigned int gain = 0;
+	int currSectID = mVes[v].Section();
+	int sectID;
+	for(sectID = 1; sectID <= mSect.size(); sectID++) {
+		gain += computeFlowWithinSection(v, sectID) * (D(currSectID, sectID) - D(s, sectID));
+	}
+	return gain;
+}
+
+
+void BAPGPPartitioner::ImproveSolution() {
+	InitializeBucketDS();
+}
+
+
+void BAPGPPartitioner::InitializeBucketDS() {
+	for(int vID = 1; vID <= mNumVes; vID++) {
+		for (int sID = 1; sID <= mNumSect; sID++) {
+			if(mVes[vID].Section() != sID) { // TODO: not sure if this check is required. double check.
+				bucketDS.insert(vID, sID, ComputeGain(vID, sID));
+			}
+		}
+	}
+}
 

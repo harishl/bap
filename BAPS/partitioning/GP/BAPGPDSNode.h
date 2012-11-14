@@ -7,6 +7,7 @@
 
 #ifndef BAPGPDSNODE_H_
 #define BAPGPDSNODE_H_
+#include "def.h"
 
 class BAPGPDSNode {
 public:
