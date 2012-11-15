@@ -659,18 +659,39 @@ unsigned int BAPGPPartitioner::ComputeGain(int v, int s) {
 	return gain;
 }
 
-
 void BAPGPPartitioner::ImproveSolution() {
 	//FM for BAP
 	InitializeBucketDS();
-	/*array<int> vesStatus;
+	array<int> vesStatus(1, mNumVes);
+	int numFreeVessels = mNumVes;
 	for(int i = 1; i <= mNumVes; i++) {
 		vesStatus[i] = 1; // all vessels are free
-	}*/
+	}
+
+	numFreeVessels = 5;
+/*	cout<<"bucketDS.MaxGainPtr->gain"<<bucketDS.MaxGainPtr->gain<<endl;
+	cout<<"bucketDS.MaxGainPtr->right"<<bucketDS.MaxGainPtr->right<<endl;
+	cout<<"bucketDS.MaxGainPtr->left->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(bucketDS.MaxGainPtr->left)->gain<<endl;
+	BAPGPDSGainIndexNode* temp=dynamic_cast<BAPGPDSGainIndexNode*>(bucketDS.MaxGainPtr->left);
+	cout<<"temp->gain"<<temp->gain<<endl;
+	cout<<"temp->left->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->left)->gain<<endl;
+	cout<<"temp->right->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->right)->gain<<endl;
+	temp=dynamic_cast<BAPGPDSGainIndexNode*>(temp->left);
+		cout<<"temp->gain"<<temp->gain<<endl;
+		cout<<"temp->left->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->left)->gain<<endl;
+		cout<<"temp->right->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->right)->gain<<endl;
+		temp=dynamic_cast<BAPGPDSGainIndexNode*>(temp->left);
+				cout<<"temp->gain"<<temp->gain<<endl;
+				cout<<"temp->left->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->left)->gain<<endl;
+				cout<<"temp->right->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->right)->gain<<endl;*/
 
 
+	while(numFreeVessels) {
+		BAPGPDSMoveNode* moveNode = bucketDS.extractMaxGainNode(mVes, mSect);
+		cout << "MoveNode: " << moveNode << endl;
+		numFreeVessels--;
+	}
 }
-
 
 void BAPGPPartitioner::InitializeBucketDS() {
 	for(int vID = 1; vID <= mNumVes; vID++) {

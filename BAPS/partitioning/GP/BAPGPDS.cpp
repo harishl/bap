@@ -31,12 +31,12 @@ void BAPGPDS::insertCellNode(BAPGPDSNode* iterNode, BAPGPDSNode* cellNode) {
 	cellNode->left = iterNode;
 }
 BAPGPDSMoveNode* BAPGPDS::createCellNode(int vid, int sid,
-		BAPGPDSGainIndexNode* maxptr) {
+		BAPGPDSGainIndexNode* gainptr) {
 	BAPGPDSMoveNode* cellNode;
 	cellNode = new BAPGPDSMoveNode();
 	cellNode->vId = vid;
 	cellNode->sId = sid;
-	cellNode->gainIndexNode = maxptr;
+	cellNode->gainIndexNode = gainptr;
 	return cellNode;
 }
 void BAPGPDS::insert(int vid, int sectid, int gain) {
@@ -51,15 +51,7 @@ void BAPGPDS::insert(int vid, int sectid, int gain) {
 	} else if (gain < MaxGainPtr->gain) {
 		cout << "MaxGainPtr->gain " << MaxGainPtr->gain
 				<< "\n MaxGainPtr->left " << MaxGainPtr->left << endl;
-		/*	if(MaxGainPtr->left == NULL) {
-		 BAPGPDSGainIndexNode* gainNode = new BAPGPDSGainIndexNode();
-		 BAPGPDSMoveNode* cellNode = createCellNode(vid, sectid, gainNode);
-		 insertMoveNodeForNonExisingGainNodeAtEnd(vid, sectid, MaxGainPtr, gain,gainNode, cellNode);
-		 }
-		 else {*/
-		BAPGPDSGainIndexNode* node =
-
-		MaxGainPtr;
+		BAPGPDSGainIndexNode* node =MaxGainPtr;
 		while (node->left != NULL) {
 			if (gain >= node->gain)
 				break;
@@ -81,7 +73,6 @@ void BAPGPDS::insert(int vid, int sectid, int gain) {
 					gainNode, cellNode);
 		}
 	}
-	//}
 }
 void BAPGPDS::insertMoveNodeAtMaximumGainNode(int vid, int sectid) {
 	BAPGPDSMoveNode* cellNode = createCellNode(vid, sectid, MaxGainPtr);
@@ -113,8 +104,8 @@ void BAPGPDS::insertMoveNodeForNonExisingGainNodeAtEnd(int vid, int sectid,
 		BAPGPDSGainIndexNode* gainNode, BAPGPDSMoveNode* cellNode) {
 
 	gainNode->gain = gain;
-	gainNode->left = node;
-	node->right = gainNode;
+	gainNode->right = node;
+	node->left = gainNode;
 
 	cellNode->left = gainNode;
 	gainNode->moveNode = cellNode;
@@ -127,11 +118,10 @@ void BAPGPDS::insertMoveNodeForNonExisingGainNode(int vid, int sectid,
 
 	gainNode->gain = gain;
 	//cout << "gainNode->gain = " << gainNode->gain;
-	gainNode->left = node->left;
-	gainNode->right = node;
-	node->left = gainNode;
-	node->left->right = gainNode;
-
+	gainNode->left = node;
+	gainNode->right = node->right;
+	node->right->left = gainNode;
+	node->right= gainNode;
 	cellNode->left = gainNode;
 	gainNode->moveNode = cellNode;
 	lookUp(vid, sectid) = cellNode;
@@ -192,42 +182,74 @@ void BAPGPDS::updateCellNode(int vid, int sectid, int gain) {
 		MaxGainPtr = gainNode;
 	}
 }
-BAPGPDSMoveNode* BAPGPDS::extractMaxGainNode(array<GPVessel>  mVes,array<GPSection> mSect){
-BAPGPDSGainIndexNode* gainNode=MaxGainPtr;
-BAPGPDSMoveNode* moveNode=dynamic_cast<BAPGPDSMoveNode*> (gainNode->moveNode);
-int loopFlag=1;
-while(loopFlag)
-{
-		if (mSect[moveNode->sId].CanAccommodate(mVes[moveNode->vId])) { // node has to be removed that particular logic has to be written
-			BAPGPDSMoveNode* leftNodeofDelNode =
-					dynamic_cast<BAPGPDSMoveNode*>(moveNode->left);
-			if (leftNodeofDelNode != NULL) {
-				leftNodeofDelNode->right = NULL;
-				lookUp(moveNode->vId, moveNode->sId) = NULL;
-			} else {
-				lookUp(moveNode->vId, moveNode->sId) = NULL;
-				BAPGPDSGainIndexNode* delGainNode =
-						dynamic_cast<BAPGPDSGainIndexNode*>(moveNode->gainIndexNode);
-				delGainNode->left->right = delGainNode->right;
-				delGainNode->right->left = delGainNode->left;
-			}
 
+BAPGPDSMoveNode* BAPGPDS::extractMaxGainNode(array<GPVessel> mVes, array<GPSection> mSect) {
+	BAPGPDSGainIndexNode* gainNode = MaxGainPtr;
+	BAPGPDSMoveNode* moveNode = dynamic_cast<BAPGPDSMoveNode*>(gainNode->moveNode);
+	int loopFlag = 1;
+	while (loopFlag) {
+		if (mSect[moveNode->sId].CanAccommodate(mVes[moveNode->vId])) {
+			lookUp(moveNode->vId, moveNode->sId) = NULL;
+
+			BAPGPDSMoveNode* leftNodeofDelNode = dynamic_cast<BAPGPDSMoveNode*>(moveNode->left);
+			if (leftNodeofDelNode != NULL) {
+				cout << "leftNodeofDelNode != NULL" << endl;
+				leftNodeofDelNode->right = moveNode->right;
+				if(moveNode->right!=NULL)
+					moveNode->right->left=leftNodeofDelNode;
+			} else {
+				cout << "leftNodeofDelNode == NULL" << endl;
+				if (MaxGainPtr->gain == (dynamic_cast<BAPGPDSGainIndexNode*>(moveNode->gainIndexNode))->gain && moveNode->right==NULL){
+					cout << "MaxGainPtr->gain == moveNode->gainIndexNode | moveNode->right==NULL | MaxGainPtr->gain = " << MaxGainPtr->gain << endl;
+					MaxGainPtr = dynamic_cast<BAPGPDSGainIndexNode*>(MaxGainPtr->left);
+					MaxGainPtr->right=NULL;
+				}
+				else if(MaxGainPtr->gain == (dynamic_cast<BAPGPDSGainIndexNode*>(moveNode->gainIndexNode))->gain && moveNode->right!=NULL){
+					cout << "MaxGainPtr->gain == moveNode->gainIndexNode | moveNode->right!=NULL | MaxGainPtr->gain = " << MaxGainPtr->gain << endl;
+					MaxGainPtr->moveNode = dynamic_cast<BAPGPDSGainIndexNode*>(MaxGainPtr->left);
+					moveNode->right->left=MaxGainPtr;
+				}
+				else {
+					if(moveNode->right==NULL){
+					cout << "MaxGainPtr->gain ("<<MaxGainPtr->gain <<")!= moveNode->gainIndexNode"<< endl;
+					BAPGPDSGainIndexNode* delGainNode = dynamic_cast<BAPGPDSGainIndexNode*>(moveNode->gainIndexNode);
+				/*	cout<<"delGainNode->gain:"<<delGainNode->gain<<endl;
+					cout<<"delGainNode->right->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->right))->gain<<endl;
+					cout<<"delGainNode->left->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->left))->gain<<endl;
+					cout<<"delGainNode->right->left->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->right->left))->gain<<endl;
+					cout<<"delGainNode->left->right->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->left->right))->gain<<endl;*/
+					if(delGainNode->left!=NULL)
+					delGainNode->left->right = delGainNode->right;
+
+					if(delGainNode->right!=NULL)
+					delGainNode->right->left = delGainNode->left;
+				/*	cout<<"delGainNode->right->left->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->right->left))->gain<<endl;
+					cout<<"delGainNode->left->right->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->left->right))->gain<<endl;*/
+
+					}
+					else
+					{
+						BAPGPDSGainIndexNode* gainNode = dynamic_cast<BAPGPDSGainIndexNode*>(moveNode->gainIndexNode);
+						gainNode->moveNode=moveNode->right;
+						moveNode->right->left=gainNode;
+					}
+				}
+			}
 			break;
 		}
 		if (gainNode->left == NULL && moveNode->right == NULL) {
 			loopFlag = 0;
 			moveNode = dynamic_cast<BAPGPDSMoveNode*>(moveNode->right);
-		}
-		else if (moveNode->right == NULL) {
+		} else if (moveNode->right == NULL) {
 			gainNode = dynamic_cast<BAPGPDSGainIndexNode*>(gainNode->left);
 			moveNode = dynamic_cast<BAPGPDSMoveNode*>(gainNode->moveNode);
-		}
-		else {
+		} else {
 			moveNode = dynamic_cast<BAPGPDSMoveNode*>(moveNode->right);
 		}
 	}
 	return moveNode;
 }
+
 BAPGPDS::~BAPGPDS() {
 // TODO Auto-generated destructor stub
 }
