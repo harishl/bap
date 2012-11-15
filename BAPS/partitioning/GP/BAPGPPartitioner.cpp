@@ -661,7 +661,14 @@ unsigned int BAPGPPartitioner::ComputeGain(int v, int s) {
 
 
 void BAPGPPartitioner::ImproveSolution() {
+	//FM for BAP
 	InitializeBucketDS();
+	/*array<int> vesStatus;
+	for(int i = 1; i <= mNumVes; i++) {
+		vesStatus[i] = 1; // all vessels are free
+	}*/
+
+
 }
 
 
