@@ -31,7 +31,7 @@ using std::endl;
 GPVessel::GPVessel()
 : mID(0), mLength(0), mStartTimeZone(0), mEndTimeZone(0), mSection(0),
   mImport(0), mExport(0), mArrival(0), mDeparture(0), mContainers(0),
-  mTranshipment(0)
+  mTranshipment(0), locked(0)
 {
 }
 
@@ -39,7 +39,7 @@ GPVessel::GPVessel()
 GPVessel::GPVessel(int anID, int aLength)
 : mID(anID), mLength(aLength), mStartTimeZone(0), mEndTimeZone(0),
   mSection(0), mImport(0), mExport(0), mArrival(0), mDeparture(0),
-  mContainers(0), mTranshipment(0)
+  mContainers(0), mTranshipment(0), locked(0)
 {
 }
 

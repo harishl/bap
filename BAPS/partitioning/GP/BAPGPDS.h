@@ -33,7 +33,9 @@ public:
 	void insertMoveNodeAtMaximumGainNode(int vid,int sectid);
 	void insertMoveNodeAboveMaxGainNode(int vid, int sectid,long int gain);
 	void insertMoveNodeForNonExisingGainNodeAtEnd(int vid, int sectid,BAPGPDSGainIndexNode* node, long int gain,BAPGPDSGainIndexNode* gainNode, BAPGPDSMoveNode* cellNode);
-	BAPGPDSMoveNode* extractMaxGainNode(array<GPVessel>  mVes,array<GPSection> mSect);
+	BAPGPDSMoveNode* extractMaxGainNode(array<GPVessel>* mVes,array<GPSection>* mSect);
+	long int getGain(int vid,int sectid);
+	void clear();
 
 	virtual ~BAPGPDS();
 };

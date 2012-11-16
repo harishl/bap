@@ -8,19 +8,6 @@ using std::ofstream;
 using std::ios;
 using std::setprecision;
 
-int compareTP(const TP& tp1, const TP& tp2) {
-	int result = 0;
-	if(tp1.timePoint == tp2.timePoint) {
-		if(!tp1.isArrival) {
-			result = tp1.timePoint;
-		}
-	}
-	else {
-		result = tp1.timePoint - tp2.timePoint;
-	}
-	return result;
-}
-
 BAPGPPartitioner::BAPGPPartitioner(BAPPackage& aPackage)
 :  BAPPartitioner(aPackage),           // init base class
    mNumVes(aPackage.NumVessels()),
@@ -32,7 +19,8 @@ BAPGPPartitioner::BAPGPPartitioner(BAPPackage& aPackage)
    mTraceFile(mPackage.PartitioningTraceFilename()),
    mRuntimeAnalyzer(0),
    mSolnExists(false),
-   bucketDS(mNumVes, mNumSect)
+   bucketDS(mNumVes, mNumSect),
+   partialGains(array<PartialGain>(1, mNumVes))
 {
    gettimeofday(&mStartTime, NULL);
    array<int>  temp;
@@ -128,7 +116,7 @@ void BAPGPPartitioner::Solve()
    GenerateInitialSolution();
    CalcInitialObjVal();
    ImproveSolution();
-
+   CalcInitialObjVal();
    gettimeofday(&mEndTime, NULL);
 
    PrintSummary();
@@ -636,6 +624,14 @@ void BAPGPPartitioner::Assign(GPVessel& v, GPSection& s)
    mUnallocVes.del(v.ID());
 }
 
+void BAPGPPartitioner::UnAssign(GPVessel& v) {
+	int assignedSect = v.Section();
+	v.Section(UNASSIGNED);
+	v.AddDestination(assignedSect);
+	mSect[assignedSect].Remove(v);
+	mUnallocVes.insert(v.ID());
+}
+
 int BAPGPPartitioner::computeFlowWithinSection(int vID, int sID) {
 	int vesID, flow = 0;
 
@@ -649,56 +645,160 @@ int BAPGPPartitioner::computeFlowWithinSection(int vID, int sID) {
 	return flow;
 }
 
-unsigned int BAPGPPartitioner::ComputeGain(int v, int s) {
-	unsigned int gain = 0;
+long int BAPGPPartitioner::ComputeGain(int v, int s) {
+	long int gain = 0;
 	int currSectID = mVes[v].Section();
-	int sectID;
-	for(sectID = 1; sectID <= mSect.size(); sectID++) {
-		gain += computeFlowWithinSection(v, sectID) * (D(currSectID, sectID) - D(s, sectID));
+	for(int sectID = 1; sectID <= mSect.size(); sectID++) {
+		gain += (computeFlowWithinSection(v, sectID) * (D(currSectID, sectID) - D(s, sectID)));
 	}
 	return gain;
 }
 
-void BAPGPPartitioner::ImproveSolution() {
-	//FM for BAP
-	InitializeBucketDS();
-	array<int> vesStatus(1, mNumVes);
-	int numFreeVessels = mNumVes;
-	for(int i = 1; i <= mNumVes; i++) {
-		vesStatus[i] = 1; // all vessels are free
+void BAPGPPartitioner::UpdateSelfGain(int v, int s) {
+	long int newGain, gainChange = 0;
+	int currSectID = mVes[v].Section();
+
+	// Vessel v was moved from mSect[currSectID] to mSect[s]
+	for(int sectID = 1; sectID <= mSect.size(); sectID++) {
+		gainChange += computeFlowWithinSection(v, sectID) * (D(s, sectID) - D(currSectID, sectID));
 	}
 
-	numFreeVessels = 5;
-/*	cout<<"bucketDS.MaxGainPtr->gain"<<bucketDS.MaxGainPtr->gain<<endl;
-	cout<<"bucketDS.MaxGainPtr->right"<<bucketDS.MaxGainPtr->right<<endl;
-	cout<<"bucketDS.MaxGainPtr->left->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(bucketDS.MaxGainPtr->left)->gain<<endl;
-	BAPGPDSGainIndexNode* temp=dynamic_cast<BAPGPDSGainIndexNode*>(bucketDS.MaxGainPtr->left);
-	cout<<"temp->gain"<<temp->gain<<endl;
-	cout<<"temp->left->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->left)->gain<<endl;
-	cout<<"temp->right->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->right)->gain<<endl;
-	temp=dynamic_cast<BAPGPDSGainIndexNode*>(temp->left);
-		cout<<"temp->gain"<<temp->gain<<endl;
-		cout<<"temp->left->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->left)->gain<<endl;
-		cout<<"temp->right->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->right)->gain<<endl;
-		temp=dynamic_cast<BAPGPDSGainIndexNode*>(temp->left);
-				cout<<"temp->gain"<<temp->gain<<endl;
-				cout<<"temp->left->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->left)->gain<<endl;
-				cout<<"temp->right->gain"<<dynamic_cast<BAPGPDSGainIndexNode*>(temp->right)->gain<<endl;*/
+	for(int sectID = 1; sectID <= mSect.size(); sectID++) {
+		if(sectID != currSectID && sectID != s) {
+			cout << "calling bucketDS.getGain(" << v << ", " << sectID << ") + " << gainChange << endl;
+			newGain = bucketDS.getGain(v, sectID) + gainChange;
+			cout << "calling UpdateSelfGain: bucketDS.updateCellNode(" << v << ", " << sectID << ", " << newGain << ");"<< endl;
+			bucketDS.updateCellNode(v, sectID, newGain);
+		}
+	}
+}
 
+void BAPGPPartitioner::UpdateNeighbourGain(int v, int s) {
+	long int neighbour, newNeighbourGain, gainChange = 0;
+	int currSectID = mVes[v].Section();
+	const set<int>&   neighbours = mVes[v].Neighbours();
 
-	while(numFreeVessels) {
-		BAPGPDSMoveNode* moveNode = bucketDS.extractMaxGainNode(mVes, mSect);
-		cout << "MoveNode: " << moveNode << endl;
-		numFreeVessels--;
+	forall(neighbour, neighbours) {
+		if(mVes[neighbour].Section() == UNASSIGNED)
+				continue;
+		for(int sectID = 1; sectID <= mSect.size(); sectID++) {
+			gainChange = TotalFlow(v, neighbour) *
+					(
+							  D(mVes[neighbour].Section(), s) //d_xl
+							- D(sectID, s) //d_yl
+							+ D(sectID, currSectID) // d_yk
+							- D(mVes[neighbour].Section(), currSectID) // d_xk
+					);
+			cout << "calling bucketDS.getGain(" << neighbour << ", " << sectID << ") + " << gainChange << endl;
+			newNeighbourGain = bucketDS.getGain(neighbour, sectID) + gainChange;
+			cout << "calling UpdateNeighbourGain: bucketDS.updateCellNode(" << neighbour << ", " << sectID << ", " << gainChange << ");"<< endl;
+			bucketDS.updateCellNode(neighbour, sectID, newNeighbourGain);
+			cout << "after bucketDS.updateCellNode()" << endl;
+		}
+	}
+	cout << "exiting UpdateNeighbourGain(" << v << ", " << s << ");" << endl;
+}
+
+void BAPGPPartitioner::ImproveSolution() {
+	//FM for BAP
+	int pass = 0;
+	while(1) {
+	cout << "Entering Pass: " << ++pass << endl;
+	bucketDS.clear();
+	InitializeBucketDS();
+	partialGains = array<PartialGain>(1, mNumVes);
+	partialGainSoFar = 0;
+	partialGainIndex = 0;
+	for(int i = 1; i<=mNumVes; i++)
+	{
+		if(mVes[i].Section() == UNASSIGNED) continue;
+		mVes[i].setLocked(0);
+	}
+
+	BAPGPDSMoveNode* moveNode = bucketDS.extractMaxGainNode(&mVes, &mSect);
+	cout << "bucketDS.extractMaxGainNode(mVes, mSect) returned " << moveNode << endl;
+	while (moveNode) {
+		PartialGain p;
+		p.vID = moveNode->vId;
+		p.From_sID = mVes[moveNode->vId].Section();
+		p.To_sID = moveNode->sId;
+		partialGainSoFar += bucketDS.getGain(moveNode->vId, moveNode->sId);
+		p.partialGain = partialGainSoFar;
+		++partialGainIndex;
+		partialGains.set(partialGainIndex, p);
+		cout << "insert into partialGains [" << p.vID << ", " << p.From_sID << ", " << p.To_sID << ", " << p.partialGain << "]" << endl;
+
+		mVes[moveNode->vId].setLocked(1);
+		cout << "calling UpdateSelfGain(" << moveNode->vId << ", "
+				<< moveNode->sId << ");" << endl;
+		UpdateSelfGain(moveNode->vId, moveNode->sId);
+		cout << "calling UpdateNeighbourGain(" << moveNode->vId << ", "
+				<< moveNode->sId << ");" << endl;
+		UpdateNeighbourGain(moveNode->vId, moveNode->sId);
+		cout << "calling UnAssign(" << moveNode->vId << ")" << endl;
+		UnAssign(mVes[moveNode->vId]);
+		cout << "calling Assign(" << moveNode->vId << ", " << moveNode->sId
+				<< ")" << endl;
+		Assign(mVes[moveNode->vId], mSect[moveNode->sId]);
+		cout << "after Assign()" << endl;
+		moveNode = bucketDS.extractMaxGainNode(&mVes, &mSect);
+		cout << "bucketDS.extractMaxGainNode(mVes, mSect) returned " << moveNode << endl;
+	}
+
+	PartialGain p;
+	int maxPartialGainIndex = 0;
+	long int maxGain = -1 * INFINITY_BAP;
+	int vID, From_sID, To_sID;
+	cout << "partialGains.size() = " << partialGains.size() << endl;
+	for (int i = 1; i <= partialGains.size(); i++) {
+		p = partialGains[i];
+		if(p.vID == 0) continue;
+		if (maxGain <= p.partialGain) {
+			maxGain = p.partialGain;
+			vID = p.vID;
+			From_sID = p.From_sID;
+			To_sID = p.To_sID;
+			maxPartialGainIndex = i;
+			cout << "maxGain: " << maxGain
+					<< "|vID: " << vID
+					<< "|From_sID: " << From_sID
+					<< "|To_sID: " << To_sID
+					<< "|maxPartialGainIndex: " << maxPartialGainIndex << endl;
+		}
+	}
+
+	for (int i = mNumVes; i > maxPartialGainIndex; i--) {
+		p = partialGains[i];
+		if(p.vID == 0) continue;
+		cout << "undoing partialGains [" << p.vID << ", " << p.From_sID << ", " << p.To_sID << ", " << p.partialGain << "]" << endl;
+		UnAssign(mVes[p.vID]);
+		Assign(mVes[p.vID], mSect[p.From_sID]);
+	}
+
+	for(int i = 1; i <= mNumSect; i++) {
+		cout << "Section: " << i << endl;
+		set<int> vesselsInSect = mSect[i].Vessels();
+		int v;
+		forall(v, vesselsInSect) {
+			cout << " " << v << ",";
+		}
+		cout << endl;
+	}
+
+	if (maxGain <= 0){
+		cout << "FM Terminates after Pass: " << pass << endl;
+		break;
+	}
+
 	}
 }
 
 void BAPGPPartitioner::InitializeBucketDS() {
 	for(int vID = 1; vID <= mNumVes; vID++) {
 		for (int sID = 1; sID <= mNumSect; sID++) {
-			if(mVes[vID].Section() != sID) { // TODO: not sure if this check is required. double check.
-				bucketDS.insert(vID, sID, ComputeGain(vID, sID));
-			}
+			if(mVes[vID].Section() == UNASSIGNED)
+				continue;
+			bucketDS.insert(vID, sID, ComputeGain(vID, sID));
 		}
 	}
 }

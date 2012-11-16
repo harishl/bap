@@ -26,17 +26,15 @@ using leda::array2;
 // Using LEDA's random source type
 typedef random_source Random;
 
-class TP {
+class PartialGain {
+	// Stores partial gain after moving vessel vID to section sID.
 public:
-	int timePoint;
-	bool isArrival;
-	int vesselNumber;
-};
+	int vID;
+	int From_sID;
+	int To_sID;
+	long int partialGain;
 
-class TimeZone {
-public:
-	int start;
-	int end;
+	PartialGain() : vID(0), From_sID(0), To_sID(0), partialGain(0) {}
 };
 
 class BAPGPPartitioner : public BAPPartitioner
@@ -64,13 +62,16 @@ private:
 
    // Abstractions
    void Assign(GPVessel& v, GPSection& s);
+   void UnAssign(GPVessel& v);
    void AssignVesselToRandomSection(GPVessel& v);
    void AssignVesselToMaxFlowSection(GPVessel& v);
    int computeFlowWithinSection(int vID, int sID);
    void CalcInitialObjVal();
    unsigned long CalcObjVal() const;
    void ComputeObjVal(unsigned long& aTrans, unsigned long& aPenalty) const;
-   unsigned int ComputeGain(int v, int s);
+   long int ComputeGain(int v, int s);
+   void UpdateSelfGain(int v, int s);
+   void UpdateNeighbourGain(int v, int s);
    void GenerateInitialSolution();
    void ImproveSolution();
    void InitializeBucketDS();
@@ -110,6 +111,8 @@ private:
    // Information
    unsigned long  mTranshipment;
    unsigned long  mPenalty;
+   long int 		partialGainSoFar;
+   int 				partialGainIndex;
 
    // Data structures
    const int      mNumVes;
@@ -121,5 +124,7 @@ private:
    set<int>       mUnallocVes;
    Random         mRandom;
    BAPGPDS        bucketDS;
+   array<PartialGain> partialGains;
+
 };
 

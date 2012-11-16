@@ -72,6 +72,14 @@ public:
    void     AddDestination(int aSection);
    void     RemoveDestination(int aSection);
 
+	int getLocked() const {
+		return locked;
+	}
+
+	void setLocked(int locked) {
+		this->locked = locked;
+	}
+
 private:
    int      mID;
    int      mLength;
@@ -82,6 +90,7 @@ private:
    int      mSection;
    set<int> mNeighbours;
    set<int> mPotentialDestinations;
+   int 		locked;
 };
 
 
