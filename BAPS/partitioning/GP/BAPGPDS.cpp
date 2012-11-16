@@ -24,7 +24,7 @@ BAPGPDS::BAPGPDS(int noV, int noS) :
 
 void BAPGPDS::insertCellNode(BAPGPDSNode* iterNode, BAPGPDSNode* cellNode) {
 	while (iterNode->right != NULL) {
-		cout << "iterNode vID = ["
+	cout << "iterNode vID = ["
 				<< dynamic_cast<BAPGPDSMoveNode*>(iterNode)->vId << ", "
 				<< dynamic_cast<BAPGPDSMoveNode*>(iterNode)->sId << "]" << endl;
 		iterNode = iterNode->right;

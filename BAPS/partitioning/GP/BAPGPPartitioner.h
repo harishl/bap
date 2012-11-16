@@ -87,6 +87,7 @@ private:
    unsigned int TotalFlow(const GPVessel& v1, const GPVessel& v2) const;
    unsigned int D(const int& s1, const int& s2) const;
    unsigned int D(const GPSection& s1, const GPSection& s2) const;
+   void TryAllocationForUnassignedVessels();
 
    // Constants
    static const unsigned int  LONGDISTANCE = INFINITY_BAP;
