@@ -429,8 +429,6 @@ void BAPGPPartitioner::GenSolnZoneDensity() {
 	array<IntPair> tz = mPackage.TimeZones();
 	for (int i = 1; i <= mPackage.NumTimeZones(); i++) {
 		numVessels = mPackage.numVesselsInTimeZone(i);
-		cout << i << " : [" << tz[i].Start() << ", " << tz[i].End() << "] : "
-				<< numVessels << endl;
 		PQ.insert(totalNumVessels - numVessels, i);
 	}
 
@@ -441,7 +439,6 @@ void BAPGPPartitioner::GenSolnZoneDensity() {
 		// Select busiest time zone
 		it = PQ.find_min();
 
-		//cout << "[" << PQ.prio(it) << ", " << PQ.inf(it) << "] " << endl;
 		// Get set of vessels in this timezone
 		vesInTZ = mPackage.Vessels(PQ.inf(it));
 		forall(vesID, vesInTZ)
@@ -453,7 +450,6 @@ void BAPGPPartitioner::GenSolnZoneDensity() {
 		while (!PQ_ves.empty()) {
 			// get the vessel occupying the most number of time zones
 			itVes = PQ_ves.find_min();
-			//cout << "[" << PQ_ves.prio(itVes) << ", " << PQ_ves.inf(itVes) << "] " << endl;
 			int vID = PQ_ves.inf(itVes);
 			if (mVes[vID].Section() == UNASSIGNED) {
 				AssignVesselToMaxFlowSection(mVes[vID]);
@@ -463,13 +459,12 @@ void BAPGPPartitioner::GenSolnZoneDensity() {
 		}
 		PQ.del_item(it);
 	}
-	cout << "mUnallocVes = " << mUnallocVes.size() << endl;
-	GPVessel v;
 
+/*	GPVessel v;
 	forall(v, mVes)
 	{
 		cout << "{ " << v.ID() << ", " << v.Section() << "}" << endl;
-	}
+	}*/
 }
 
 // Assigns Vessel v to a random section
@@ -513,11 +508,6 @@ void BAPGPPartitioner::AssignVesselToMaxFlowSection(GPVessel& v) {
 		flow[i] = computeFlowWithinSection(vID, i);
 	}
 
-	for (int k = 1; k <= flow.size(); k++) {
-		cout << "vessel " << vID << " has a flow of " << flow[k]
-				<< " for section " << k << ".\n";
-	}
-
 	do {
 		maxFlow = -10;
 		for (int k = 1; k <= flow.size(); k++) {
@@ -527,8 +517,6 @@ void BAPGPPartitioner::AssignVesselToMaxFlowSection(GPVessel& v) {
 			}
 		}
 		if (maxFlow != -1) {
-			cout << "chosenSection is " << chosenSectionID
-					<< " because it had flow = " << maxFlow << endl;
 			flow[chosenSectionID] = -1; // so that it will not be chosen again
 			if (mSect[chosenSectionID].CanAccommodate(v)) {
 				Assign(mVes[vID], mSect[chosenSectionID]);
@@ -546,7 +534,6 @@ void BAPGPPartitioner::Assign(GPVessel& v, GPSection& s) {
 
 void BAPGPPartitioner::UnAssign(GPVessel& v) {
 	int assignedSect = v.Section();
-	cout << "assignedSect:" << assignedSect << endl;
 	v.Section(UNASSIGNED);
 	v.AddDestination(assignedSect);
 	mSect[assignedSect].Remove(v);
@@ -563,7 +550,6 @@ int BAPGPPartitioner::computeFlowWithinSection(int vID, int sID) {
 			flow += TotalFlow(vID, vesID);
 		}
 	}
-	// cout << "flow: vID -> SID = " << flow << endl;
 	return flow;
 }
 
@@ -584,7 +570,6 @@ void BAPGPPartitioner::TryAllocationForUnassignedVessels() {
 		set<int> zones = mPackage.TimeZones(v);
 		set<int> spanningVessels;
 		set<int> vessels;
-		cout << "Vessel " << v << endl;
 		forall(zone, zones)
 		{
 			vessels = mPackage.Vessels(zone);
@@ -594,50 +579,30 @@ void BAPGPPartitioner::TryAllocationForUnassignedVessels() {
 					spanningVessels.insert(vessel);
 			}
 		}
-		forall(vessel, spanningVessels)
-		{
-			cout << vessel << ", ";
-		}
+
 		forall(v1, spanningVessels)
 		{
 			forall(v2, spanningVessels)
 			{
 				int sk = mVes[v1].Section(), sl = mVes[v2].Section();
-				cout << "v1,sk:" << v1 << "," << sk << "|v2,sl:" << v2 << ","
-						<< sl << endl;
 				if (sk != sl) {
 					success = false;
-					cout << "before Unassign V1" << endl;
 					UnAssign(mVes[v1]);
-					cout << "After Unassign V1" << endl;
 					UnAssign(mVes[v2]);
-					cout << "After Unassign V2" << endl;
-					if (mSect[sl].CanAccommodate(mVes[v1])
-							&& mSect[sk].CanAccommodate(mVes[v2])) {
-						cout << "Inside canaccomodate of v1,sl and v2,sk"
-								<< endl;
+					if (mSect[sl].CanAccommodate(mVes[v1]) && mSect[sk].CanAccommodate(mVes[v2]))
+					{
 						Assign(mVes[v1], mSect[sl]);
-						cout << "After assign V1 to sl" << endl;
 						Assign(mVes[v2], mSect[sk]);
-						cout << "After assign V2 to sk" << endl;
 						if (mSect[sk].CanAccommodate(mVes[v])) {
-							cout << "trying to assign V to sk" << endl;
 							Assign(mVes[v], mSect[sk]);
-							cout << "After assign V to sk" << endl;
 							success = true;
 						}
 					}
 					if (!success) {
-						if (mVes[v1].Section() != UNASSIGNED)
-							UnAssign(mVes[v1]);
-						cout << "After unassign V1 to sl" << endl;
-						if (mVes[v2].Section() != UNASSIGNED)
-							UnAssign(mVes[v2]);
-						cout << "After unassign V2 to sk" << endl;
+						if (mVes[v1].Section() != UNASSIGNED) UnAssign(mVes[v1]);
+						if (mVes[v2].Section() != UNASSIGNED) UnAssign(mVes[v2]);
 						Assign(mVes[v2], mSect[sl]);
-						cout << "After assign V1 to sk" << endl;
 						Assign(mVes[v1], mSect[sk]);
-						cout << "After assign V2 to sl" << endl;
 					} else {
 						break;
 					}
@@ -660,11 +625,7 @@ void BAPGPPartitioner::UpdateSelfGain(int v, int s) {
 
 	for (int sectID = 1; sectID <= mSect.size(); sectID++) {
 		if (sectID != currSectID && sectID != s) {
-			cout << "calling bucketDS.getGain(" << v << ", " << sectID << ") + "
-					<< gainChange << endl;
 			newGain = bucketDS.getGain(v, sectID) + gainChange;
-			cout << "calling UpdateSelfGain: bucketDS.updateCellNode(" << v
-					<< ", " << sectID << ", " << newGain << ");" << endl;
 			bucketDS.updateCellNode(v, sectID, newGain);
 		}
 	}
@@ -686,17 +647,10 @@ void BAPGPPartitioner::UpdateNeighbourGain(int v, int s) {
 					+ D(sectID, currSectID) // d_yk
 					- D(mVes[neighbour].Section(), currSectID) // d_xk
 					);
-			cout << "calling bucketDS.getGain(" << neighbour << ", " << sectID
-					<< ") + " << gainChange << endl;
 			newNeighbourGain = bucketDS.getGain(neighbour, sectID) + gainChange;
-			cout << "calling UpdateNeighbourGain: bucketDS.updateCellNode("
-					<< neighbour << ", " << sectID << ", " << gainChange << ");"
-					<< endl;
 			bucketDS.updateCellNode(neighbour, sectID, newNeighbourGain);
-			cout << "after bucketDS.updateCellNode()" << endl;
 		}
 	}
-	cout << "exiting UpdateNeighbourGain(" << v << ", " << s << ");" << endl;
 }
 
 void BAPGPPartitioner::ImproveSolution() {
@@ -716,8 +670,7 @@ void BAPGPPartitioner::ImproveSolution() {
 		}
 
 		BAPGPDSMoveNode* moveNode = bucketDS.extractMaxGainNode(&mVes, &mSect);
-		cout << "bucketDS.extractMaxGainNode(mVes, mSect) returned " << moveNode
-				<< endl;
+		cout << "bucketDS.extractMaxGainNode(mVes, mSect) returned " << moveNode << endl;
 		while (moveNode) {
 			PartialGain p;
 			p.vID = moveNode->vId;
@@ -725,38 +678,29 @@ void BAPGPPartitioner::ImproveSolution() {
 			p.To_sID = moveNode->sId;
 			partialGainSoFar += bucketDS.getGain(moveNode->vId, moveNode->sId);
 			p.partialGain = partialGainSoFar;
-			++partialGainIndex;
 			partialGains.set(partialGainIndex, p);
-			cout << "insert into partialGains [" << p.vID << ", " << p.From_sID
-					<< ", " << p.To_sID << ", " << p.partialGain << "]" << endl;
+			++partialGainIndex;
+			cout << "insert into partialGains[" << partialGainIndex << "] ["
+					<< p.vID << ", " << p.From_sID << ", " << p.To_sID << ", "
+					<< p.partialGain << "]" << endl;
 
 			mVes[moveNode->vId].setLocked(1);
-			cout << "calling UpdateSelfGain(" << moveNode->vId << ", "
-					<< moveNode->sId << ");" << endl;
 			UpdateSelfGain(moveNode->vId, moveNode->sId);
-			cout << "calling UpdateNeighbourGain(" << moveNode->vId << ", "
-					<< moveNode->sId << ");" << endl;
 			UpdateNeighbourGain(moveNode->vId, moveNode->sId);
-			cout << "calling UnAssign(" << moveNode->vId << ")" << endl;
 			UnAssign(mVes[moveNode->vId]);
-			cout << "calling Assign(" << moveNode->vId << ", " << moveNode->sId
-					<< ")" << endl;
 			Assign(mVes[moveNode->vId], mSect[moveNode->sId]);
-			cout << "after Assign()" << endl;
 			moveNode = bucketDS.extractMaxGainNode(&mVes, &mSect);
-			cout << "bucketDS.extractMaxGainNode(mVes, mSect) returned "
-					<< moveNode << endl;
 		}
 
 		PartialGain p;
 		int maxPartialGainIndex = 0;
-		long int maxGain = -1 * INFINITY_BAP;
+		long int maxGain = 0;
 		int vID, From_sID, To_sID;
-		cout << "partialGains.size() = " << partialGains.size() << endl;
+
+		//find maxPartialGainIndex
 		for (int i = 1; i <= partialGains.size(); i++) {
 			p = partialGains[i];
-			if (p.vID == 0)
-				continue;
+			if (p.vID == 0) continue;
 			if (maxGain <= p.partialGain) {
 				maxGain = p.partialGain;
 				vID = p.vID;
@@ -774,13 +718,30 @@ void BAPGPPartitioner::ImproveSolution() {
 			p = partialGains[i];
 			if (p.vID == 0)
 				continue;
-			cout << "undoing partialGains [" << p.vID << ", " << p.From_sID
-					<< ", " << p.To_sID << ", " << p.partialGain << "]" << endl;
+			cout << "undoing partialGains[" << i << "] [" << p.vID << ", "
+					<< p.From_sID << ", " << p.To_sID << ", " << p.partialGain
+					<< "]" << endl;
 			UnAssign(mVes[p.vID]);
 			Assign(mVes[p.vID], mSect[p.From_sID]);
 		}
 
-		for (int i = 1; i <= mNumSect; i++) {
+		if (maxPartialGainIndex > 0) {
+			if (partialGains[maxPartialGainIndex].partialGain == 0) {
+				// if maxGain is zero, we undo everything
+				for (int i = maxPartialGainIndex; i > 0; i--) {
+					p = partialGains[i];
+					if (p.vID == 0)
+						continue;
+					cout << "undoing partialGains[" << i << "] [" << p.vID << ", "
+							<< p.From_sID << ", " << p.To_sID << ", " << p.partialGain
+							<< "]" << endl;
+					UnAssign(mVes[p.vID]);
+					Assign(mVes[p.vID], mSect[p.From_sID]);
+				}
+			}
+		}
+
+/*		for (int i = 1; i <= mNumSect; i++) {
 			cout << "Section: " << i << endl;
 			set<int> vesselsInSect = mSect[i].Vessels();
 			int v;
@@ -789,7 +750,7 @@ void BAPGPPartitioner::ImproveSolution() {
 				cout << " " << v << ",";
 			}
 			cout << endl;
-		}
+		}*/
 
 		if (maxGain <= 0) {
 			cout << "FM Terminates after Pass: " << pass << endl;

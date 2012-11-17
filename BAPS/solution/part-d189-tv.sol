@@ -1,6 +1,6 @@
 #
 # Solution File created by BAPGPPartitioner
-# Date = Fri Nov 16 11:10:09 2012
+# Date = Sat Nov 17 12:20:31 2012
 # Parameter File = /home/harish/bapm3/BAPS/param/tv.par
 #
 
@@ -11,16 +11,16 @@ _NUM_VESSELS
 209
 
 _OBJECTIVE_VALUE
-3171780
+2694380
 
 _TRANSHIPMENT_VALUE
-3171780
+2694380
 
 _PENALTY_VALUE
 0
 
 _TIME_TAKEN
-0.307440
+0.331136
 
 # Final Allocation Solution
 # <ves#> <sect> <wharf> <berth time> <departure time>
@@ -216,24 +216,3 @@ _ALLOCATION
 187 2 -1 78 81
 188 1 -1 43 46
 189 3 -1 30 33
-190 3 -1 81 83
-191 3 -1 46 50
-192 1 -1 79 82
-193 1 -1 74 80
-194 2 -1 17 20
-195 3 -1 27 33
-196 1 -1 1 4
-197 3 -1 72 77
-198 2 -1 47 52
-199 1 -1 57 60
-200 3 -1 78 84
-201 3 -1 49 52
-202 1 -1 48 52
-203 2 -1 4 7
-204 2 -1 12 19
-205 2 -1 24 28
-206 2 -1 52 54
-207 1 -1 17 21
-208 2 -1 81 84
-
-

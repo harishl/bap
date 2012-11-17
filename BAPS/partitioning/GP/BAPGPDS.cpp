@@ -17,23 +17,19 @@ using std::ostream;
 using std::iostream;
 
 BAPGPDS::BAPGPDS(int noV, int noS) :
-		noOfVessels(noV), noOfSections(noS), lookUp(
-				array2<BAPGPDSMoveNode*>(1, noOfVessels, 1, noOfSections)), MaxGainPtr(
-				NULL) {
-}
+		noOfVessels(noV),
+		noOfSections(noS),
+		lookUp(array2<BAPGPDSMoveNode*>(1, noOfVessels, 1, noOfSections)),
+		MaxGainPtr(NULL) {}
 
 void BAPGPDS::insertCellNode(BAPGPDSNode* iterNode, BAPGPDSNode* cellNode) {
 	while (iterNode->right != NULL) {
-	cout << "iterNode vID = ["
-				<< dynamic_cast<BAPGPDSMoveNode*>(iterNode)->vId << ", "
-				<< dynamic_cast<BAPGPDSMoveNode*>(iterNode)->sId << "]" << endl;
 		iterNode = iterNode->right;
 	}
 	iterNode->right = cellNode;
 	cellNode->left = iterNode;
 }
-BAPGPDSMoveNode* BAPGPDS::createCellNode(int vid, int sid,
-		BAPGPDSGainIndexNode* gainptr) {
+BAPGPDSMoveNode* BAPGPDS::createCellNode(int vid, int sid, BAPGPDSGainIndexNode* gainptr) {
 	BAPGPDSMoveNode* cellNode;
 	cellNode = new BAPGPDSMoveNode();
 	cellNode->vId = vid;
@@ -50,8 +46,7 @@ void BAPGPDS::insert(int vid, int sectid, int gain) {
 		}
 	}
 
-	cout << "inserting [" << vid << ", " << sectid << ", " << gain << "]"
-			<< endl;
+	cout << "inserting [" << vid << ", " << sectid << ", " << gain << "]" << endl;
 	if (MaxGainPtr == NULL) {
 		insertFirstNode(vid, sectid, gain);
 	} else if (gain > MaxGainPtr->gain) {
@@ -234,65 +229,16 @@ cout<<"after lookup"<<endl;
 	}
 }
 
-BAPGPDSMoveNode* BAPGPDS::extractMaxGainNode(array<GPVessel>* mVes,
-		array<GPSection>* mSect) {
+BAPGPDSMoveNode* BAPGPDS::extractMaxGainNode(array<GPVessel>* mVes, array<GPSection>* mSect) {
 	cout << "Entering extractMaxGainNode()" << endl;
 	BAPGPDSGainIndexNode* gainNode = MaxGainPtr;
-	cout<<"assigning move node"<<endl;
-	BAPGPDSMoveNode* moveNode =
-			dynamic_cast<BAPGPDSMoveNode*>(gainNode->moveNode);
-	cout<<"move node assigned"<<endl;
+	BAPGPDSMoveNode* moveNode = dynamic_cast<BAPGPDSMoveNode*>(gainNode->moveNode);
 	int loopFlag = 1;
 	while (loopFlag) {
 		if ((*mSect)[moveNode->sId].CanAccommodate((*mVes)[moveNode->vId])
 				&& !(*mVes)[moveNode->vId].getLocked()
-				&& (*mVes)[moveNode->vId].Section() != moveNode->sId) {
-			//	lookUp(moveNode->vId, moveNode->sId) = NULL;
-
-			/*			BAPGPDSMoveNode* leftNodeofDelNode = dynamic_cast<BAPGPDSMoveNode*>(moveNode->left);
-			 if (leftNodeofDelNode != NULL) {
-			 cout << "leftNodeofDelNode != NULL" << endl;
-			 leftNodeofDelNode->right = moveNode->right;
-			 if(moveNode->right!=NULL)
-			 moveNode->right->left=leftNodeofDelNode;
-			 } else {
-			 cout << "leftNodeofDelNode == NULL" << endl;
-			 if (MaxGainPtr->gain == (dynamic_cast<BAPGPDSGainIndexNode*>(moveNode->gainIndexNode))->gain && moveNode->right==NULL){
-			 cout << "MaxGainPtr->gain == moveNode->gainIndexNode | moveNode->right==NULL | MaxGainPtr->gain = " << MaxGainPtr->gain << endl;
-			 MaxGainPtr = dynamic_cast<BAPGPDSGainIndexNode*>(MaxGainPtr->left);
-			 MaxGainPtr->right=NULL;
-			 }
-			 else if(MaxGainPtr->gain == (dynamic_cast<BAPGPDSGainIndexNode*>(moveNode->gainIndexNode))->gain && moveNode->right!=NULL){
-			 cout << "MaxGainPtr->gain == moveNode->gainIndexNode | moveNode->right!=NULL | MaxGainPtr->gain = " << MaxGainPtr->gain << endl;
-			 MaxGainPtr->moveNode = dynamic_cast<BAPGPDSGainIndexNode*>(MaxGainPtr->left);
-			 moveNode->right->left=MaxGainPtr;
-			 }
-			 else {
-			 if(moveNode->right==NULL){
-			 cout << "MaxGainPtr->gain ("<<MaxGainPtr->gain <<")!= moveNode->gainIndexNode"<< endl;
-			 BAPGPDSGainIndexNode* delGainNode = dynamic_cast<BAPGPDSGainIndexNode*>(moveNode->gainIndexNode);
-			 cout<<"delGainNode->gain:"<<delGainNode->gain<<endl;
-			 cout<<"delGainNode->right->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->right))->gain<<endl;
-			 cout<<"delGainNode->left->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->left))->gain<<endl;
-			 cout<<"delGainNode->right->left->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->right->left))->gain<<endl;
-			 cout<<"delGainNode->left->right->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->left->right))->gain<<endl;
-			 if(delGainNode->left!=NULL)
-			 delGainNode->left->right = delGainNode->right;
-
-			 if(delGainNode->right!=NULL)
-			 delGainNode->right->left = delGainNode->left;
-			 cout<<"delGainNode->right->left->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->right->left))->gain<<endl;
-			 cout<<"delGainNode->left->right->gain"<<(dynamic_cast<BAPGPDSGainIndexNode*>(delGainNode->left->right))->gain<<endl;
-
-			 }
-			 else
-			 {
-			 BAPGPDSGainIndexNode* gainNode = dynamic_cast<BAPGPDSGainIndexNode*>(moveNode->gainIndexNode);
-			 gainNode->moveNode=moveNode->right;
-			 moveNode->right->left=gainNode;
-			 }
-			 }
-			 }*/
+				&& (*mVes)[moveNode->vId].Section() != moveNode->sId)
+		{
 			break;
 		}
 		if (gainNode->left == NULL && moveNode->right == NULL) {
