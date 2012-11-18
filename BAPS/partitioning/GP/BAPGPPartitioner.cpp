@@ -115,6 +115,16 @@ void BAPGPPartitioner::PrintSummary() const {
 			<< (mEndTime.tv_sec - mStartTime.tv_sec)
 					+ (mEndTime.tv_usec - mStartTime.tv_usec) / 1000000.0
 			<< endl << endl;
+
+	cout << "OutputValues,"
+			<< mPackage.ProjectFilename() << ","
+			<< mNumVes << ","
+			<< mNumSect << ","
+			<< mTranshipment << ","
+			<< mPenalty << ","
+			<< CalcObjVal() << ","
+			<< (mEndTime.tv_sec - mStartTime.tv_sec) + (mEndTime.tv_usec - mStartTime.tv_usec) / 1000000.0
+			<< endl;
 }
 
 void BAPGPPartitioner::InitSolution() {
@@ -390,7 +400,11 @@ string BAPGPPartitioner::Date() const {
 void BAPGPPartitioner::GenerateInitialSolution() {
 	InitSolution();
 	//GenSolnRandom();
-	GenSolnZoneDensity();
+	//GenSolnZoneDensity();
+	//GenSolnZoneDensityTransVol();
+	//GenSolnZoneDensityVesLength();
+	//GenSolnByBestFit();
+	GenSolnByFirstFit();
 }
 
 // This method actually create the random vessel partitioning
@@ -443,8 +457,7 @@ void BAPGPPartitioner::GenSolnZoneDensity() {
 		vesInTZ = mPackage.Vessels(PQ.inf(it));
 		forall(vesID, vesInTZ)
 		{
-			PQ_ves.insert(totalNumTZ - mPackage.numTimeZonesForVessel(vesID),
-					vesID);
+			PQ_ves.insert(totalNumTZ - mPackage.numTimeZonesForVessel(vesID), vesID);
 		}
 
 		while (!PQ_ves.empty()) {
@@ -452,7 +465,8 @@ void BAPGPPartitioner::GenSolnZoneDensity() {
 			itVes = PQ_ves.find_min();
 			int vID = PQ_ves.inf(itVes);
 			if (mVes[vID].Section() == UNASSIGNED) {
-				AssignVesselToMaxFlowSection(mVes[vID]);
+				//AssignVesselToMaxFlowSection(mVes[vID]);
+				AssignVesselToMinTransSection(mVes[vID]);
 			}
 			PQ_ves.del_item(itVes);
 
@@ -460,11 +474,144 @@ void BAPGPPartitioner::GenSolnZoneDensity() {
 		PQ.del_item(it);
 	}
 
-/*	GPVessel v;
-	forall(v, mVes)
-	{
-		cout << "{ " << v.ID() << ", " << v.Section() << "}" << endl;
-	}*/
+	/*	GPVessel v;
+	 forall(v, mVes)
+	 {
+	 cout << "{ " << v.ID() << ", " << v.Section() << "}" << endl;
+	 }*/
+}
+
+void BAPGPPartitioner::GenSolnZoneDensityTransVol() {
+
+	int maxTrans = -1;
+	for(int i = 1; i<=mNumVes; i++) {
+		if(maxTrans < mVes[i].Transhipment()) {
+			maxTrans = mVes[i].Transhipment();
+		}
+	}
+
+	int numVessels, totalNumVessels;
+	totalNumVessels = mNumVes;
+	p_queue<int, int> PQ, PQ_ves;
+	array<IntPair> tz = mPackage.TimeZones();
+	for (int i = 1; i <= mPackage.NumTimeZones(); i++) {
+		numVessels = mPackage.numVesselsInTimeZone(i);
+		PQ.insert(totalNumVessels - numVessels, i);
+	}
+
+	pq_item it, itVes;
+	set<int> vesInTZ;
+	int vesID, totalNumTZ = tz.size();
+	while (!PQ.empty()) {
+		// Select busiest time zone
+		it = PQ.find_min();
+
+		// Get set of vessels in this timezone
+		vesInTZ = mPackage.Vessels(PQ.inf(it));
+		forall(vesID, vesInTZ)
+		{
+			PQ_ves.insert(maxTrans - mVes[vesID].Transhipment(), vesID);
+		}
+
+		while (!PQ_ves.empty()) {
+			// get the vessel occupying the most number of time zones
+			itVes = PQ_ves.find_min();
+			int vID = PQ_ves.inf(itVes);
+			if (mVes[vID].Section() == UNASSIGNED) {
+				//AssignVesselToMaxFlowSection(mVes[vID]);
+				AssignVesselToMinTransSection(mVes[vID]);
+			}
+			PQ_ves.del_item(itVes);
+
+		}
+		PQ.del_item(it);
+	}
+
+	/*	GPVessel v;
+	 forall(v, mVes)
+	 {
+	 cout << "{ " << v.ID() << ", " << v.Section() << "}" << endl;
+	 }*/
+}
+
+void BAPGPPartitioner::GenSolnZoneDensityVesLength() {
+	int maxLength = -1;
+	for(int i = 1; i<=mNumVes; i++) {
+		if(maxLength < mVes[i].Length()) {
+			maxLength = mVes[i].Length();
+		}
+	}
+
+	int numVessels, totalNumVessels;
+	totalNumVessels = mNumVes;
+	p_queue<int, int> PQ, PQ_ves;
+	array<IntPair> tz = mPackage.TimeZones();
+	for (int i = 1; i <= mPackage.NumTimeZones(); i++) {
+		numVessels = mPackage.numVesselsInTimeZone(i);
+		PQ.insert(totalNumVessels - numVessels, i);
+	}
+
+	pq_item it, itVes;
+	set<int> vesInTZ;
+	int vesID, totalNumTZ = tz.size();
+	while (!PQ.empty()) {
+		// Select busiest time zone
+		it = PQ.find_min();
+
+		// Get set of vessels in this timezone
+		vesInTZ = mPackage.Vessels(PQ.inf(it));
+		forall(vesID, vesInTZ)
+		{
+			PQ_ves.insert(maxLength - mVes[vesID].Length(), vesID);
+		}
+
+		while (!PQ_ves.empty()) {
+			// get the vessel occupying the most number of time zones
+			itVes = PQ_ves.find_min();
+			int vID = PQ_ves.inf(itVes);
+			if (mVes[vID].Section() == UNASSIGNED) {
+				//AssignVesselToMaxFlowSection(mVes[vID]);
+				AssignVesselToMinTransSection(mVes[vID]);
+			}
+			PQ_ves.del_item(itVes);
+
+		}
+		PQ.del_item(it);
+	}
+
+	/*	GPVessel v;
+	 forall(v, mVes)
+	 {
+	 cout << "{ " << v.ID() << ", " << v.Section() << "}" << endl;
+	 }*/
+}
+
+void BAPGPPartitioner::GenSolnByBestFit(){
+	for(int vid = 1; vid<=mNumVes;vid++) {
+		int bestSectionId = -1, minCapacity = INFINITY_BAP;
+		for(int sid = 1; sid<=mNumSect; sid++) {
+			if(mSect[sid].CanAccommodate(mVes[vid])) {
+				if(minCapacity > mSect[sid].Capacity(mVes[vid])) {
+					bestSectionId = sid;
+					minCapacity = mSect[sid].Capacity(mVes[vid]);
+				}
+			}
+		}
+		if(bestSectionId != -1) {
+			Assign(mVes[vid], mSect[bestSectionId]);
+		}
+	}
+}
+
+void BAPGPPartitioner::GenSolnByFirstFit(){
+	for(int vid = 1; vid<=mNumVes;vid++) {
+		for(int sid = 1; sid<=mNumSect; sid++) {
+			if(mSect[sid].CanAccommodate(mVes[vid])) {
+				Assign(mVes[vid], mSect[sid]);
+				break;
+			}
+		}
+	}
 }
 
 // Assigns Vessel v to a random section
@@ -498,6 +645,38 @@ void BAPGPPartitioner::AssignVesselToRandomSection(GPVessel& v) {
 		else
 			S[i--] = S[SectionsLeft--]; // remove from further consideration
 	}
+}
+void BAPGPPartitioner::AssignVesselToMinTransSection(GPVessel& v) {
+	int vID = v.ID(), chosenSectionID;
+	long int minTrans;
+	array<int> flow(1, mSect.size());
+	array<long int> trans(1, mSect.size());
+	for (int i = 1; i <= flow.size(); i++) {
+		flow[i] = computeFlowWithinSection(vID, i);
+	}
+	for (int i = 1; i <= mSect.size(); i++) {
+		trans[i]=0;
+		for (int j = 1; j <= mSect.size(); j++) {
+			trans[i] += (flow[j] * D(i, j));
+		}
+	}
+	do {
+
+		minTrans = INFINITY_BAP-1;
+		for (int k = 1; k <= trans.size(); k++) {
+			if (minTrans > trans[k]) {
+				minTrans = trans[k];
+				chosenSectionID = k;
+
+			}
+		}
+		if (minTrans != INFINITY_BAP) {
+			trans[chosenSectionID] = INFINITY_BAP; // so that it will not be chosen again
+			if (mSect[chosenSectionID].CanAccommodate(v)) {
+				Assign(mVes[vID], mSect[chosenSectionID]);
+			}
+		}
+	} while (mUnallocVes.member(vID) && minTrans != INFINITY_BAP-1);
 }
 
 void BAPGPPartitioner::AssignVesselToMaxFlowSection(GPVessel& v) {
@@ -589,8 +768,8 @@ void BAPGPPartitioner::TryAllocationForUnassignedVessels() {
 					success = false;
 					UnAssign(mVes[v1]);
 					UnAssign(mVes[v2]);
-					if (mSect[sl].CanAccommodate(mVes[v1]) && mSect[sk].CanAccommodate(mVes[v2]))
-					{
+					if (mSect[sl].CanAccommodate(mVes[v1])
+							&& mSect[sk].CanAccommodate(mVes[v2])) {
 						Assign(mVes[v1], mSect[sl]);
 						Assign(mVes[v2], mSect[sk]);
 						if (mSect[sk].CanAccommodate(mVes[v])) {
@@ -599,8 +778,10 @@ void BAPGPPartitioner::TryAllocationForUnassignedVessels() {
 						}
 					}
 					if (!success) {
-						if (mVes[v1].Section() != UNASSIGNED) UnAssign(mVes[v1]);
-						if (mVes[v2].Section() != UNASSIGNED) UnAssign(mVes[v2]);
+						if (mVes[v1].Section() != UNASSIGNED)
+							UnAssign(mVes[v1]);
+						if (mVes[v2].Section() != UNASSIGNED)
+							UnAssign(mVes[v2]);
 						Assign(mVes[v2], mSect[sl]);
 						Assign(mVes[v1], mSect[sk]);
 					} else {
@@ -670,7 +851,7 @@ void BAPGPPartitioner::ImproveSolution() {
 		}
 
 		BAPGPDSMoveNode* moveNode = bucketDS.extractMaxGainNode(&mVes, &mSect);
-		cout << "bucketDS.extractMaxGainNode(mVes, mSect) returned " << moveNode << endl;
+		//cout << "bucketDS.extractMaxGainNode(mVes, mSect) returned " << moveNode << endl;
 		while (moveNode) {
 			PartialGain p;
 			p.vID = moveNode->vId;
@@ -680,9 +861,9 @@ void BAPGPPartitioner::ImproveSolution() {
 			p.partialGain = partialGainSoFar;
 			partialGains.set(partialGainIndex, p);
 			++partialGainIndex;
-			cout << "insert into partialGains[" << partialGainIndex << "] ["
+			/*cout << "insert into partialGains[" << partialGainIndex << "] ["
 					<< p.vID << ", " << p.From_sID << ", " << p.To_sID << ", "
-					<< p.partialGain << "]" << endl;
+					<< p.partialGain << "]" << endl;*/
 
 			mVes[moveNode->vId].setLocked(1);
 			UpdateSelfGain(moveNode->vId, moveNode->sId);
@@ -700,17 +881,18 @@ void BAPGPPartitioner::ImproveSolution() {
 		//find maxPartialGainIndex
 		for (int i = 1; i <= partialGains.size(); i++) {
 			p = partialGains[i];
-			if (p.vID == 0) continue;
+			if (p.vID == 0)
+				continue;
 			if (maxGain <= p.partialGain) {
 				maxGain = p.partialGain;
 				vID = p.vID;
 				From_sID = p.From_sID;
 				To_sID = p.To_sID;
 				maxPartialGainIndex = i;
-				cout << "maxGain: " << maxGain << "|vID: " << vID
+				/*cout << "maxGain: " << maxGain << "|vID: " << vID
 						<< "|From_sID: " << From_sID << "|To_sID: " << To_sID
 						<< "|maxPartialGainIndex: " << maxPartialGainIndex
-						<< endl;
+						<< endl;*/
 			}
 		}
 
@@ -718,9 +900,9 @@ void BAPGPPartitioner::ImproveSolution() {
 			p = partialGains[i];
 			if (p.vID == 0)
 				continue;
-			cout << "undoing partialGains[" << i << "] [" << p.vID << ", "
+			/*cout << "undoing partialGains[" << i << "] [" << p.vID << ", "
 					<< p.From_sID << ", " << p.To_sID << ", " << p.partialGain
-					<< "]" << endl;
+					<< "]" << endl;*/
 			UnAssign(mVes[p.vID]);
 			Assign(mVes[p.vID], mSect[p.From_sID]);
 		}
@@ -732,25 +914,25 @@ void BAPGPPartitioner::ImproveSolution() {
 					p = partialGains[i];
 					if (p.vID == 0)
 						continue;
-					cout << "undoing partialGains[" << i << "] [" << p.vID << ", "
-							<< p.From_sID << ", " << p.To_sID << ", " << p.partialGain
-							<< "]" << endl;
+					/*cout << "undoing partialGains[" << i << "] [" << p.vID
+							<< ", " << p.From_sID << ", " << p.To_sID << ", "
+							<< p.partialGain << "]" << endl;*/
 					UnAssign(mVes[p.vID]);
 					Assign(mVes[p.vID], mSect[p.From_sID]);
 				}
 			}
 		}
 
-/*		for (int i = 1; i <= mNumSect; i++) {
-			cout << "Section: " << i << endl;
-			set<int> vesselsInSect = mSect[i].Vessels();
-			int v;
-			forall(v, vesselsInSect)
-			{
-				cout << " " << v << ",";
-			}
-			cout << endl;
-		}*/
+		/*		for (int i = 1; i <= mNumSect; i++) {
+		 cout << "Section: " << i << endl;
+		 set<int> vesselsInSect = mSect[i].Vessels();
+		 int v;
+		 forall(v, vesselsInSect)
+		 {
+		 cout << " " << v << ",";
+		 }
+		 cout << endl;
+		 }*/
 
 		if (maxGain <= 0) {
 			cout << "FM Terminates after Pass: " << pass << endl;

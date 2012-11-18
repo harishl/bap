@@ -189,3 +189,14 @@ void GPSection::Remove(const GPVessel& aVessel)
    mVessels.del(aVessel.ID());
 }
 
+int GPSection::Capacity(const GPVessel& aVessel) {
+	int minCapacity = mLength;
+	for (int i = aVessel.StartTimeZone(); i <= aVessel.EndTimeZone(); i++)
+	{
+	    if(minCapacity > mCapacity[i]) {
+	    	minCapacity = mCapacity[i];
+	    }
+	}
+	return minCapacity;
+}
+

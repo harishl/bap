@@ -63,6 +63,8 @@ private:
    // Abstractions
    void Assign(GPVessel& v, GPSection& s);
    void UnAssign(GPVessel& v);
+   void TryAllocationForUnassignedVessels();
+   void AssignVesselToMinTransSection(GPVessel& v);
    void AssignVesselToRandomSection(GPVessel& v);
    void AssignVesselToMaxFlowSection(GPVessel& v);
    int computeFlowWithinSection(int vID, int sID);
@@ -78,6 +80,10 @@ private:
    //void PlaneSweep();
    void GenSolnRandom();
    void GenSolnZoneDensity();
+   void GenSolnZoneDensityTransVol();
+   void GenSolnZoneDensityVesLength();
+   void GenSolnByBestFit();
+   void GenSolnByFirstFit();
    inline bool GotMoreMoves() const;
    void InitSolution();
    void ResetVesselDestinations();
@@ -87,7 +93,6 @@ private:
    unsigned int TotalFlow(const GPVessel& v1, const GPVessel& v2) const;
    unsigned int D(const int& s1, const int& s2) const;
    unsigned int D(const GPSection& s1, const GPSection& s2) const;
-   void TryAllocationForUnassignedVessels();
 
    // Constants
    static const unsigned int  LONGDISTANCE = INFINITY_BAP;

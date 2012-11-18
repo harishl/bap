@@ -55,6 +55,7 @@ public:
 
    void        Add(const GPVessel& aVessel);
    void        Remove(const GPVessel& aVessel);
+   int  	   Capacity(const GPVessel& aVessel);
 
 private:
    int         mID;
