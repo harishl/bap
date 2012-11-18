@@ -93,12 +93,7 @@ void BAPGPPartitioner::Print(const int& aWidth, const int& aDetail) const {
 //    (which creates a random initial solution)
 //
 void BAPGPPartitioner::Solve() {
-
 	GenerateInitialSolution();
-	/*1*/
-	InitSolution();
-	GenSolnRandom();
-	CalcInitialObjVal();
 	ImproveSolution(); // OTW
 	TryAllocationForUnassignedVessels(); //Attempt to Resolve Infeasible Solution
 	CalcInitialObjVal();
@@ -590,7 +585,14 @@ void BAPGPPartitioner::GenSolnZoneDensityVesLength() {
 }
 
 void BAPGPPartitioner::GenSolnByBestFit(){
-	for(int vid = 1; vid<=mNumVes;vid++) {
+	p_queue<int, int> PQ_ves;
+	for(int i = 1; i<=mNumVes; i++) {
+		PQ_ves.insert(1000 - mVes[i].Length(), i);
+	}
+
+	while(!PQ_ves.empty()) {
+			pq_item it = PQ_ves.find_min();
+			int vid = PQ_ves.inf(it);
 		int bestSectionId = -1, minCapacity = INFINITY_BAP;
 		for(int sid = 1; sid<=mNumSect; sid++) {
 			if(mSect[sid].CanAccommodate(mVes[vid])) {
@@ -603,18 +605,49 @@ void BAPGPPartitioner::GenSolnByBestFit(){
 		if(bestSectionId != -1) {
 			Assign(mVes[vid], mSect[bestSectionId]);
 		}
+		PQ_ves.del_item(it);
 	}
+	/*for(int vid = 1; vid<=mNumVes;vid++) {
+			int bestSectionId = -1, minCapacity = INFINITY_BAP;
+			for(int sid = 1; sid<=mNumSect; sid++) {
+				if(mSect[sid].CanAccommodate(mVes[vid])) {
+					if(minCapacity > mSect[sid].Capacity(mVes[vid])) {
+						bestSectionId = sid;
+						minCapacity = mSect[sid].Capacity(mVes[vid]);
+					}
+				}
+			}
+			if(bestSectionId != -1) {
+				Assign(mVes[vid], mSect[bestSectionId]);
+			}
+		}*/
 }
 
 void BAPGPPartitioner::GenSolnByFirstFit(){
-	for(int vid = 1; vid<=mNumVes;vid++) {
+	p_queue<int, int> PQ_ves;
+	for(int i = 1; i<=mNumVes; i++) {
+		PQ_ves.insert(1000 - mVes[i].Length(), i);
+	}
+
+	while(!PQ_ves.empty()) {
+		pq_item it = PQ_ves.find_min();
+		int vid = PQ_ves.inf(it);
 		for(int sid = 1; sid<=mNumSect; sid++) {
 			if(mSect[sid].CanAccommodate(mVes[vid])) {
 				Assign(mVes[vid], mSect[sid]);
 				break;
 			}
 		}
+		PQ_ves.del_item(it);
 	}
+	/*for(int vid = 1; vid<=mNumVes;vid++) {
+		for(int sid = 1; sid<=mNumSect; sid++) {
+			if(mSect[sid].CanAccommodate(mVes[vid])) {
+				Assign(mVes[vid], mSect[sid]);
+				break;
+			}
+		}
+	}*/
 }
 
 // Assigns Vessel v to a random section
