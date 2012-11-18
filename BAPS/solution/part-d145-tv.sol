@@ -1,6 +1,6 @@
 #
 # Solution File created by BAPGPPartitioner
-# Date = Sun Nov 18 13:23:40 2012
+# Date = Sun Nov 18 14:00:19 2012
 # Parameter File = /home/harish/bapm3/BAPS/param/tv.par
 #
 
@@ -20,7 +20,7 @@ _PENALTY_VALUE
 0
 
 _TIME_TAKEN
-0.042347
+0.041764
 
 # Final Allocation Solution
 # <ves#> <sect> <wharf> <berth time> <departure time>

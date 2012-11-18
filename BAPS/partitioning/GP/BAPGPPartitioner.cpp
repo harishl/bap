@@ -95,12 +95,14 @@ void BAPGPPartitioner::Print(const int& aWidth, const int& aDetail) const {
 void BAPGPPartitioner::Solve() {
 
 	GenerateInitialSolution();
+	/*1*/
+	InitSolution();
+	GenSolnRandom();
 	CalcInitialObjVal();
-	ImproveSolution();
-	TryAllocationForUnassignedVessels();
+	ImproveSolution(); // OTW
+	TryAllocationForUnassignedVessels(); //Attempt to Resolve Infeasible Solution
 	CalcInitialObjVal();
 	gettimeofday(&mEndTime, NULL);
-
 	PrintSummary();
 	WriteSolutionFile();
 	UpdatePackage();
@@ -122,6 +124,7 @@ void BAPGPPartitioner::PrintSummary() const {
 			<< mNumSect << ","
 			<< mTranshipment << ","
 			<< mPenalty << ","
+			<< mUnallocVes.size() << ","
 			<< CalcObjVal() << ","
 			<< (mEndTime.tv_sec - mStartTime.tv_sec) + (mEndTime.tv_usec - mStartTime.tv_usec) / 1000000.0
 			<< endl;
@@ -518,8 +521,8 @@ void BAPGPPartitioner::GenSolnZoneDensityTransVol() {
 			itVes = PQ_ves.find_min();
 			int vID = PQ_ves.inf(itVes);
 			if (mVes[vID].Section() == UNASSIGNED) {
-				//AssignVesselToMaxFlowSection(mVes[vID]);
-				AssignVesselToMinTransSection(mVes[vID]);
+				AssignVesselToMaxFlowSection(mVes[vID]);
+				//AssignVesselToMinTransSection(mVes[vID]);
 			}
 			PQ_ves.del_item(itVes);
 
@@ -570,8 +573,8 @@ void BAPGPPartitioner::GenSolnZoneDensityVesLength() {
 			itVes = PQ_ves.find_min();
 			int vID = PQ_ves.inf(itVes);
 			if (mVes[vID].Section() == UNASSIGNED) {
-				//AssignVesselToMaxFlowSection(mVes[vID]);
-				AssignVesselToMinTransSection(mVes[vID]);
+				AssignVesselToMaxFlowSection(mVes[vID]);
+				//AssignVesselToMinTransSection(mVes[vID]);
 			}
 			PQ_ves.del_item(itVes);
 
